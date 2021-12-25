@@ -15,4 +15,12 @@ dnscrypt-wrapper is modified from dnscrypt-proxy, written by Yecheng Fu
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANC
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+====
+
+The externally maintained libraries used by dnscrypt-wrapper are:
+
+  - libevent (http://libevent.org/). 3-clause BSD license.
+    See libevent/LIC
