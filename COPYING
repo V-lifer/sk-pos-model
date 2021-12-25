@@ -23,4 +23,9 @@ dnscrypt-wrapper is modified from dnscrypt-proxy, written by Yecheng Fu
 The externally maintained libraries used by dnscrypt-wrapper are:
 
   - libevent (http://libevent.org/). 3-clause BSD license.
-    See libevent/LIC
+    See libevent/LICENSE.
+
+  - argparse, See argparse/LICENSE.
+
+  - dns-protocol.h, rfc1035.c, rfc1035.h reuses code from dnsmasq by
+    Simon Kelley.
