@@ -24,3 +24,16 @@ ifeq ($(uname_S),Darwin)
   DYLIBSUFFIX=dylib
   DYLIB_MAKE_CMD=$(CC) -shared -o $(DYLIBNAME) $(ALL_LDFLAGS)
 endif
+
+all: $(DYLIBNAME) $(STLIBNAME)
+
+OBJS += argparse.o
+OBJS += test_argparse.o
+
+$(OBJS): %.o: %.c
+	$(CC) -o $*.o -c $(ALL_CFLAGS) $<
+
+$(DYLIBNAME): argparse.o
+	$(DYLIB_MAKE_CMD) $^
+
+$(STLIBNAME): ar
