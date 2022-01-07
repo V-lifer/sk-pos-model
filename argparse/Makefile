@@ -36,4 +36,17 @@ $(OBJS): %.o: %.c
 $(DYLIBNAME): argparse.o
 	$(DYLIB_MAKE_CMD) $^
 
-$(STLIBNAME): ar
+$(STLIBNAME): argparse.o
+	$(STLIB_MAKE_CMD) $^
+
+test: test_argparse
+	@echo "###### Unit Test #####"
+	@./test.sh
+
+test_argparse: $(OBJS)
+	$(CC) $(ALL_CFLAGS) -o $@ $^ $(ALL_LDFLAGS)
+
+clean:
+	rm -rf test_argparse
+	rm -rf *.[ao]
+	rm -rf *.dyli
