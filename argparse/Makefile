@@ -49,4 +49,4 @@ test_argparse: $(OBJS)
 clean:
 	rm -rf test_argparse
 	rm -rf *.[ao]
-	rm -rf *.dyli
+	rm -rf *.dylib
