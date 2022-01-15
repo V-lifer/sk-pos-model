@@ -1,0 +1,19 @@
+
+#!/bin/bash 
+
+
+_version='1.02'
+	
+_plan_set=0
+_no_plan=0
+_skip_all=0
+_test_died=0
+_expected_tests=0 
+_executed_tests=0 
+_failed_tests=0
+TODO=
+
+
+usage(){
+	cat <<'USAGE'
+tap-functions: A TAP-producing BASH library

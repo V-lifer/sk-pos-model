@@ -289,3 +289,62 @@ argparse_usage(struct argparse *self)
         if ((options)->long_name) {
             len += strlen((options)->long_name) + 2;
         }
+        if (options->type == ARGPARSE_OPT_INTEGER) {
+            len += strlen("=<int>");
+        } else if (options->type == ARGPARSE_OPT_STRING) {
+            len += strlen("=<str>");
+        }
+        len = ceil((float)len / 4) * 4;
+        if (usage_opts_width < len) {
+            usage_opts_width = len;
+        }
+    }
+    usage_opts_width += 4;      // 4 spaces prefix
+
+    options = self->options;
+    for (; options->type != ARGPARSE_OPT_END; options++) {
+        size_t pos = 0;
+        int pad = 0;
+        if (options->type == ARGPARSE_OPT_GROUP) {
+            fputc('\n', stdout);
+            fprintf(stdout, "%s", options->help);
+            fputc('\n', stdout);
+            continue;
+        }
+        pos = fprintf(stdout, "    ");
+        if (options->short_name) {
+            pos += fprintf(stdout, "-%c", options->short_name);
+        }
+        if (options->long_name && options->short_name) {
+            pos += fprintf(stdout, ", ");
+        }
+        if (options->long_name) {
+            pos += fprintf(stdout, "--%s", options->long_name);
+        }
+        if (options->type == ARGPARSE_OPT_INTEGER) {
+            pos += fprintf(stdout, "=<int>");
+        } else if (options->type == ARGPARSE_OPT_STRING) {
+            pos += fprintf(stdout, "=<str>");
+        }
+        if (pos <= usage_opts_width) {
+            pad = usage_opts_width - pos;
+        } else {
+            fputc('\n', stdout);
+            pad = usage_opts_width;
+        }
+        fprintf(stdout, "%*s%s\n", pad + 2, "", options->help);
+    }
+
+    // print epilog
+    if (self->epilog)
+        fprintf(stdout, "%s\n", self->epilog);
+}
+
+int
+argparse_help_cb(struct argparse *self, const struct argparse_option *option)
+{
+    (void)option;
+    argparse_usage(self);
+    exit(0);
+    return 0;
+}
