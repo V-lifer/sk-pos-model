@@ -40,4 +40,11 @@ Basic options
     -f, --force       force to do
     -t, --test        test only
     -p, --path=<str>  path to read
-    
+    -n, --num=<int>   selected num
+
+Bits options
+    --read            read perm
+    --write           write perm
+    --exec            exec perm
+
+Additional description of the program after the description of the arguments.
