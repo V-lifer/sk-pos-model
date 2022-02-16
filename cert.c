@@ -31,4 +31,10 @@ cert_build_cert(const uint8_t *crypt_publickey, int cert_file_expire_seconds,
     if (cert_file_expire_seconds <= 0) {
         ts_begin = ts_end;
     }
-    ts_beg
+    ts_begin = htonl(ts_begin);
+    ts_end = htonl(ts_end);
+    memcpy(signed_cert->serial, &ts_begin, 4);
+    memcpy(signed_cert->ts_begin, &ts_begin, 4);
+    memcpy(signed_cert->ts_end, &ts_end, 4);
+
+  
