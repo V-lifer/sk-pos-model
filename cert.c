@@ -16,4 +16,8 @@ cert_build_cert(const uint8_t *crypt_publickey, int cert_file_expire_seconds,
         signed_cert->version_major[1] = 1;
     }
     signed_cert->version_minor[0] = 0;
-    
+    signed_cert->version_minor[1] = 0;
+
+    memset(signed_cert->signature, 0, sizeof signed_cert->signature);
+    memcpy(signed_cert->server_publickey, crypt_publickey,
+           crypto_box_PUBLICKEYBYTES);
