@@ -24,4 +24,11 @@ cert_build_cert(const uint8_t *crypt_publickey, int cert_file_expire_seconds,
     memcpy(signed_cert->magic_query, crypt_publickey,
            sizeof(signed_cert->magic_query));
     if (use_xchacha20) {
-        sodium_increment(signed_cert->magic_query, sizeof signed_cert->magi
+        sodium_increment(signed_cert->magic_query, sizeof signed_cert->magic_query);
+    }
+    uint32_t ts_begin = (uint32_t)time(NULL);
+    uint32_t ts_end = ts_begin + cert_file_expire_seconds;
+    if (cert_file_expire_seconds <= 0) {
+        ts_begin = ts_end;
+    }
+    ts_beg
