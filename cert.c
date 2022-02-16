@@ -21,3 +21,7 @@ cert_build_cert(const uint8_t *crypt_publickey, int cert_file_expire_seconds,
     memset(signed_cert->signature, 0, sizeof signed_cert->signature);
     memcpy(signed_cert->server_publickey, crypt_publickey,
            crypto_box_PUBLICKEYBYTES);
+    memcpy(signed_cert->magic_query, crypt_publickey,
+           sizeof(signed_cert->magic_query));
+    if (use_xchacha20) {
+        sodium_increment(signed_cert->magic_query, sizeof signed_cert->magi
