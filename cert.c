@@ -37,4 +37,11 @@ cert_build_cert(const uint8_t *crypt_publickey, int cert_file_expire_seconds,
     memcpy(signed_cert->ts_begin, &ts_begin, 4);
     memcpy(signed_cert->ts_end, &ts_end, 4);
 
-  
+    return signed_cert;
+}
+
+int
+cert_sign(struct SignedCert *signed_cert, const uint8_t *provider_secretkey)
+{
+    unsigned long long signed_data_len =
+        sizeof(struct SignedCert) - offsetof(struct Sig
