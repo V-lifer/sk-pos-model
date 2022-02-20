@@ -44,4 +44,8 @@ int
 cert_sign(struct SignedCert *signed_cert, const uint8_t *provider_secretkey)
 {
     unsigned long long signed_data_len =
-        sizeof(struct SignedCert) - offsetof(struct Sig
+        sizeof(struct SignedCert) - offsetof(struct SignedCert,
+                                             server_publickey);
+
+    return crypto_sign_detached(signed_cert->signature, NULL,
+                                signed_cert->server_
