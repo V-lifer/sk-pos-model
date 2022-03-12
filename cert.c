@@ -48,4 +48,12 @@ cert_sign(struct SignedCert *signed_cert, const uint8_t *provider_secretkey)
                                              server_publickey);
 
     return crypto_sign_detached(signed_cert->signature, NULL,
-                                signed_cert->server_
+                                signed_cert->server_publickey, signed_data_len,
+                                provider_secretkey);
+}
+
+void
+cert_display_txt_record_tinydns(struct SignedCert *signed_cert)
+{
+    size_t i = (size_t) 0U;
+    int
