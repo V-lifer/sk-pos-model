@@ -81,4 +81,12 @@ cert_display_txt_record(struct SignedCert *signed_cert)
     fputs("2.dnscrypt-cert\t86400\tIN\tTXT\t\"", stdout);
     while (i < sizeof(struct SignedCert)) {
         c = (int)*((const uint8_t *) signed_cert + i);
-        if (isp
+        if (isprint(c) && c != '"' && c != '\\') {
+            putchar(c);
+        } else {
+            printf("\\%03d", c);
+        }
+        i++;
+    }
+    puts("\"");
+}
