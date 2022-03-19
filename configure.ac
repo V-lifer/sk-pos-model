@@ -40,4 +40,11 @@ config_in=config.mak.in
 CONF_SUBST([AUTOCONFIGURED], [YesPlease])
 
 # Checks for programs
-A
+AC_PROG_CC
+AC_CHECK_TOOLS(AR, [gar ar], :)
+AC_CHECK_PROGS(TAR, [gtar tar])
+
+# libevent
+AC_ARG_WITH(event,
+    [AS_HELP_STRING([--with-event=DIR], [where to find the event library])],
+    [if test -d "$withva
