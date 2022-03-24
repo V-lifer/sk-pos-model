@@ -60,4 +60,12 @@ if test "$withval" != no; then
     )   
     AC_CHECK_HEADERS(event2/event.h,
         [LIBS="-levent $LIBS"],
-        [AC_MSG_ERROR([lib
+        [AC_MSG_ERROR([libevent2 is required - see http://libevent.org/])]
+    )
+fi
+
+# libsodium
+AC_ARG_WITH(sodium,
+    [AS_HELP_STRING([--with-sodium=DIR], [where to find the sodium library])],
+    [if test -d "$withval"; then
+        LD
