@@ -68,4 +68,12 @@ fi
 AC_ARG_WITH(sodium,
     [AS_HELP_STRING([--with-sodium=DIR], [where to find the sodium library])],
     [if test -d "$withval"; then
-        LD
+        LDFLAGS="$LDFLAGS -L$withval/lib"
+        CFLAGS="$CFLAGS -I$withval/include"
+    fi],
+    withval=yes # default
+)
+if test "$withval" != no; then
+    AC_CHECK_LIB(sodium,sodium_init,
+        [LIBS="-lsodium $LIBS"],
+   
