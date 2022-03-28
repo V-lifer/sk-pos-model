@@ -81,4 +81,13 @@ if test "$withval" != no; then
 fi
 
 AC_CHECK_FUNCS(crypto_box_curve25519xchacha20poly1305_open_easy,
-    [CFLAGS="$CFLAGS -DHAVE_CRYPTO_BOX_CU
+    [CFLAGS="$CFLAGS -DHAVE_CRYPTO_BOX_CURVE25519XCHACHA20POLY1305_OPEN_EASY"],
+    [AC_MSG_WARN([was libsodium compiled with --enable-minimal])]
+)
+
+# Output files
+AC_CONFIG_FILES(["${config_file}":"${config_in}"])
+AC_OUTPUT
+
+# Show summary.
+AC_MSG_RESULT
