@@ -90,4 +90,9 @@ AC_CONFIG_FILES(["${config_file}":"${config_in}"])
 AC_OUTPUT
 
 # Show summary.
-AC_MSG_RESULT
+AC_MSG_RESULT([
+Configuration summary:
+
+    Support for event library: $ac_cv_lib_event_event_base_new
+    Support for sodium library: $ac_cv_lib_sodium_sodium_init
+    Support for xchacha20: $
