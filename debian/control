@@ -4,4 +4,10 @@ Priority: optional
 Maintainer: Andrey Korolyov <andrey@xdel.ru>
 Build-Depends: debhelper (>= 9), automake, dh-autoreconf, libsodium-dev, libevent-dev
 Standards-Version: 3.9.8
-Ho
+Homepage: https://dnscrypt.info
+
+Package: dnscrypt-wrapper
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
+Description: custom secured DNS query wrapper
+ DNSCrypt is
