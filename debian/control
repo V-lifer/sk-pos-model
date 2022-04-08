@@ -12,4 +12,9 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
 Description: custom secured DNS query wrapper
  DNSCrypt is a protocol that authenticates communications between a DNS client 
  and a DNS resolver. It prevents DNS spoofing. It uses cryptographic signatures 
- to verify that responses originate from the chosen 
+ to verify that responses originate from the chosen DNS resolver and
+ haven't been tampered with.
+ .
+ This package provides server-side proxy for DNS queries to a designated
+ upstream.
+
