@@ -1,1 +1,5 @@
-# This file describes option set for DNSProxy-wrapper, brief expl
+# This file describes option set for DNSProxy-wrapper, brief explanation is below.
+# If you are generating keys by an application itself, please install correct access
+# bits on private keys. 
+
+RUNTIME_OPTS="--user=dnscrypt-wrapper --daemonize --pidfile=/var/run/dnscr
