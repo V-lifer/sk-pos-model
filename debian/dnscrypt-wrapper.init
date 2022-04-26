@@ -1,4 +1,10 @@
 #!/bin/sh
 # Start/stop the DNSCrypt wrapper.
 #
-##
+### BEGIN INIT INFO
+# Provides:          dnscrypt-wrapper
+# Required-Start:    $remote_fs $syslog $network
+# Required-Stop:     $remote_fs $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-
