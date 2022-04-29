@@ -1,0 +1,11 @@
+#! /bin/sh
+
+set -e
+
+case "$1" in
+	upgrade|install-upgrade)
+		;;
+	abort-upgrade)
+		exit 0
+		;;
+esac
