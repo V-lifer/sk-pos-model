@@ -45,4 +45,13 @@ case "$1" in
 		;;
 
 	restart|force-reload)
-		log_da
+		log_daemon_msg "Restarting DNSCrypt wrapper" 
+		$0 stop
+		$0 start
+		;;
+
+	status)
+		status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+		;;
+
+	*)      log_action_msg "Usage: $SCRIPTNAME {start|stop|stat
