@@ -9,3 +9,13 @@ case "$1" in
 		exit 0
 		;;
 esac
+#
+# Add the "dnscrypt-wrapper" user/group to /etc/passwd if needed.
+#
+
+if ! grep -q "^dnscrypt-wrapper:" /etc/passwd
+then
+	adduser --system --home /bin --group --shell /usr/sbin/nologin dnscrypt-wrapper
+fi
+
+# dh_installdeb
