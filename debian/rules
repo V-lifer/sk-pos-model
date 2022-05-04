@@ -4,3 +4,9 @@
 #export DH_VERBOSE=1
 
 # parallel build by default on linux
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+    ifeq ($(findstring parallel=,$(DEB_BUILD_OPTIONS)),)
+        export DEB_BUILD_OPTIONS+=parallel=$(shell getconf _NPROCESSORS_ONLN)
+    endif
+endif
+$(info DEB_BUIL
