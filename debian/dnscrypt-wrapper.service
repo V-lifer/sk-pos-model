@@ -8,4 +8,7 @@ Type=forking
 EnvironmentFile=-/etc/default/dnscrypt-wrapper
 ExecStart=/usr/sbin/dnscrypt-wrapper $RUNTIME_OPTS $NETWORK_OPTS $KEY_OPTS
 KillMode=process
-Rest
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
