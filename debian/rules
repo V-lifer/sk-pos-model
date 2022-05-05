@@ -9,4 +9,8 @@ ifeq ($(DEB_HOST_ARCH_OS),linux)
         export DEB_BUILD_OPTIONS+=parallel=$(shell getconf _NPROCESSORS_ONLN)
     endif
 endif
-$(info DEB_BUIL
+$(info DEB_BUILD_OPTIONS=$(DEB_BUILD_OPTIONS))
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+export DEB_HOST_GNU_TYPE  ?= $(shell dpkg-archi
