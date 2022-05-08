@@ -19,4 +19,9 @@ export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
 # minimise needless linking
-export DEB_LDFLAG
+export DEB_LDFLAGS_MAINT_APPEND= -Wl,--as-needed
+
+CONFFLAGS_COMMON  = --host=$(DEB_HOST_GNU_TYPE) \
+                    --build=$(DEB_BUILD_GNU_TYPE) \
+                    --sysconfdir=/etc/dnscrypt-wrapper \
+                    --p
