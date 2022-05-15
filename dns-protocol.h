@@ -29,4 +29,10 @@
 
 #define PACKETSZ	512		/* maximum packet size */
 #define MAXDNAME	1025		/* maximum presentation domain name */
-#define RRFIXEDSZ	10		/* #/bytes of fixed data in r
+#define RRFIXEDSZ	10		/* #/bytes of fixed data in r record */
+#define MAXLABEL        63              /* maximum length of domain label */
+
+#define NOERROR		0		/* no error */
+#define FORMERR		1		/* format error */
+#define SERVFAIL	2		/* server failure */
+#def
