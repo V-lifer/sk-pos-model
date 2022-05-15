@@ -24,4 +24,9 @@
 #define NAMESERVER_PORT 53
 #define TFTP_PORT       69
 
-#define IN6ADDRSZ   
+#define IN6ADDRSZ       16
+#define INADDRSZ        4
+
+#define PACKETSZ	512		/* maximum packet size */
+#define MAXDNAME	1025		/* maximum presentation domain name */
+#define RRFIXEDSZ	10		/* #/bytes of fixed data in r
