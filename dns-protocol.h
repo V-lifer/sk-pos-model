@@ -41,4 +41,10 @@
 
 #define QUERY           0               /* opcode */
 
-#define C_IN            1               /* the arpa i
+#define C_IN            1               /* the arpa internet */
+#define C_CHAOS         3               /* for chaos net (MIT) */
+#define C_ANY           255             /* wildcard match */
+
+#define T_A		1
+#define T_NS            2               
+#define 
