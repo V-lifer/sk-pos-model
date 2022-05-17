@@ -35,4 +35,10 @@
 #define NOERROR		0		/* no error */
 #define FORMERR		1		/* format error */
 #define SERVFAIL	2		/* server failure */
-#def
+#define NXDOMAIN	3		/* non existent domain */
+#define NOTIMP		4		/* not implemented */
+#define REFUSED		5		/* query refused */
+
+#define QUERY           0               /* opcode */
+
+#define C_IN            1               /* the arpa i
