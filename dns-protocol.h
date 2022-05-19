@@ -47,4 +47,14 @@
 
 #define T_A		1
 #define T_NS            2               
-#define 
+#define T_CNAME		5
+#define T_SOA		6
+#define T_PTR		12
+#define T_MX		15
+#define T_TXT		16
+#define T_SIG		24
+#define T_AAAA		28
+#define T_SRV		33
+#define T_NAPTR		35
+#define T_OPT		41
+#define	T
