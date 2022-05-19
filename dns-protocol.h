@@ -57,4 +57,16 @@
 #define T_SRV		33
 #define T_NAPTR		35
 #define T_OPT		41
-#define	T
+#define	T_TKEY		249		
+#define	T_TSIG		250
+#define T_MAILB		253	
+#define T_ANY		255
+
+struct dns_header {
+  uint16_t id;
+  uint8_t  hb3,hb4;
+  uint16_t qdcount,ancount,nscount,arcount;
+};
+
+#define HB3_QR       0x80
+#defi
