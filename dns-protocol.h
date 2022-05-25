@@ -77,4 +77,10 @@ struct dns_header {
 #define HB4_RA       0x80
 #define HB4_AD       0x20
 #define HB4_CD       0x10
-#define HB4
+#define HB4_RCODE    0x0f
+
+#define OPCODE(x)          (((x)->hb3 & HB3_OPCODE) >> 3)
+#define RCODE(x)           ((x)->hb4 & HB4_RCODE)
+#define SET_RCODE(x, code) (x)->hb4 = ((x)->hb4 & ~HB4_RCODE) | code
+  
+#define GETSHORT(s,
