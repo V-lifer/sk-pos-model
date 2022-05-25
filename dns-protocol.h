@@ -69,4 +69,12 @@ struct dns_header {
 };
 
 #define HB3_QR       0x80
-#defi
+#define HB3_OPCODE   0x78
+#define HB3_AA       0x04
+#define HB3_TC       0x02
+#define HB3_RD       0x01
+
+#define HB4_RA       0x80
+#define HB4_AD       0x20
+#define HB4_CD       0x10
+#define HB4
