@@ -103,4 +103,12 @@ struct dns_header {
 
 #define PUTSHORT(s, cp) { \
 	uint16_t t_s = (uint16_t)(s); \
-	
+	unsigned char *t_cp = (unsigned char *)(cp); \
+	*t_cp++ = t_s >> 8; \
+	*t_cp   = t_s; \
+	(cp) += 2; \
+}
+
+#define PUTLONG(l, cp) { \
+	uint32_t t_l = (uint32_t)(l); \
+	unsigned char *t_cp = (unsigned char *)
