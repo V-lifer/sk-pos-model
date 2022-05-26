@@ -83,4 +83,13 @@ struct dns_header {
 #define RCODE(x)           ((x)->hb4 & HB4_RCODE)
 #define SET_RCODE(x, code) (x)->hb4 = ((x)->hb4 & ~HB4_RCODE) | code
   
-#define GETSHORT(s,
+#define GETSHORT(s, cp) { \
+	unsigned char *t_cp = (unsigned char *)(cp); \
+	(s) = ((uint16_t)t_cp[0] << 8) \
+	    | ((uint16_t)t_cp[1]) \
+	    ; \
+	(cp) += 2; \
+}
+
+#define GETLONG(l, cp) { \
+	unsigned char *t_cp = (unsigned char *)(c
