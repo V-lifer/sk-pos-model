@@ -32,4 +32,12 @@ _skip_name(const uint8_t *const dns_packet, const size_t dns_packet_len,
 
 static ssize_t
 edns_get_payload_size(const uint8_t *const dns_packet,
-                      const size_t dns
+                      const size_t dns_packet_len)
+{
+    size_t offset;
+    size_t payload_size;
+    unsigned int arcount;
+
+    assert(dns_packet_len >= DNS_HEADER_SIZE);
+    arcount = (dns_packet[DNS_OFFSET_ARCOUNT] << 8) |
+        dns_pack
