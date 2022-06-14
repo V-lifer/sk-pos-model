@@ -40,4 +40,9 @@ edns_get_payload_size(const uint8_t *const dns_packet,
 
     assert(dns_packet_len >= DNS_HEADER_SIZE);
     arcount = (dns_packet[DNS_OFFSET_ARCOUNT] << 8) |
-        dns_pack
+        dns_packet[DNS_OFFSET_ARCOUNT + 1U];
+    assert(arcount > 0U);
+    assert(DNS_OFFSET_QUESTION <= DNS_HEADER_SIZE);
+    if (dns_packet[DNS_OFFSET_QDCOUNT] != 0U ||
+        dns_packet[DNS_OFFSET_QDCOUNT + 1U] != 1U ||
+        (dns_packet[DNS_OFFSE
