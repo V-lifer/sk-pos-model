@@ -49,4 +49,11 @@ edns_get_payload_size(const uint8_t *const dns_packet,
          dns_packet[DNS_OFFSET_ANCOUNT + 1U]) != 0U ||
         (dns_packet[DNS_OFFSET_NSCOUNT] |
          dns_packet[DNS_OFFSET_NSCOUNT + 1U]) != 0U) {
-        return (ssize_t
+        return (ssize_t) - 1;
+    }
+    offset = DNS_OFFSET_QUESTION;
+    if (_skip_name(dns_packet, dns_packet_len, &offset) != 0) {
+        return (ssize_t) - 1;
+    }
+    assert(dns_packet_len > (size_t) DNS_QTYPE_PLUS_QCLASS_LEN);
+ 
