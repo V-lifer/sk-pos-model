@@ -45,4 +45,8 @@ edns_get_payload_size(const uint8_t *const dns_packet,
     assert(DNS_OFFSET_QUESTION <= DNS_HEADER_SIZE);
     if (dns_packet[DNS_OFFSET_QDCOUNT] != 0U ||
         dns_packet[DNS_OFFSET_QDCOUNT + 1U] != 1U ||
-        (dns_packet[DNS_OFFSE
+        (dns_packet[DNS_OFFSET_ANCOUNT] |
+         dns_packet[DNS_OFFSET_ANCOUNT + 1U]) != 0U ||
+        (dns_packet[DNS_OFFSET_NSCOUNT] |
+         dns_packet[DNS_OFFSET_NSCOUNT + 1U]) != 0U) {
+        return (ssize_t
