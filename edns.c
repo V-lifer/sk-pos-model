@@ -60,4 +60,9 @@ edns_get_payload_size(const uint8_t *const dns_packet,
         return (ssize_t) - 1;
     }
     offset += DNS_QTYPE_PLUS_QCLASS_LEN;
-    assert(dns_packet_len >= DNS_OFFSET_EDNS_PAYLO
+    assert(dns_packet_len >= DNS_OFFSET_EDNS_PAYLOAD_SIZE + 2U);
+    if (_skip_name(dns_packet, dns_packet_len, &offset) != 0 ||
+        offset >= dns_packet_len - DNS_OFFSET_EDNS_PAYLOAD_SIZE - 2U) {
+        return (ssize_t) - 1;
+    }
+    assert(DNS_OFFSET_EDNS_PAYLOAD_SI
