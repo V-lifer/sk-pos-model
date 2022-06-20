@@ -65,4 +65,9 @@ edns_get_payload_size(const uint8_t *const dns_packet,
         offset >= dns_packet_len - DNS_OFFSET_EDNS_PAYLOAD_SIZE - 2U) {
         return (ssize_t) - 1;
     }
-    assert(DNS_OFFSET_EDNS_PAYLOAD_SI
+    assert(DNS_OFFSET_EDNS_PAYLOAD_SIZE > DNS_OFFSET_EDNS_TYPE);
+    if (dns_packet[offset + DNS_OFFSET_EDNS_TYPE] != 0U ||
+        dns_packet[offset + DNS_OFFSET_EDNS_TYPE + 1U] != DNS_TYPE_OPT) {
+        return (ssize_t) - 1;
+    }
+    payload
