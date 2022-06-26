@@ -70,4 +70,7 @@ edns_get_payload_size(const uint8_t *const dns_packet,
         dns_packet[offset + DNS_OFFSET_EDNS_TYPE + 1U] != DNS_TYPE_OPT) {
         return (ssize_t) - 1;
     }
-    payload
+    payload_size = (dns_packet[offset + DNS_OFFSET_EDNS_PAYLOAD_SIZE] << 8) |
+        dns_packet[offset + DNS_OFFSET_EDNS_PAYLOAD_SIZE + 1U];
+    if (payload_size < DNS_MAX_PACKET_SIZE_UDP_SEND) {
+        payload_size = DNS_
