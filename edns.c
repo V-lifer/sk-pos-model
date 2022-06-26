@@ -73,4 +73,12 @@ edns_get_payload_size(const uint8_t *const dns_packet,
     payload_size = (dns_packet[offset + DNS_OFFSET_EDNS_PAYLOAD_SIZE] << 8) |
         dns_packet[offset + DNS_OFFSET_EDNS_PAYLOAD_SIZE + 1U];
     if (payload_size < DNS_MAX_PACKET_SIZE_UDP_SEND) {
-        payload_size = DNS_
+        payload_size = DNS_MAX_PACKET_SIZE_UDP_SEND;
+    }
+    return (ssize_t) payload_size;
+}
+
+int
+edns_add_section(struct context *const c,
+                 uint8_t *const dns_packet,
+                 size_t
