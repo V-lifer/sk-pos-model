@@ -87,4 +87,7 @@ edns_add_section(struct context *const c,
 {
     const size_t edns_payload_size = c->edns_payload_size;
 
-    assert(edns_payload_size <= (si
+    assert(edns_payload_size <= (size_t) 0xFFFF);
+    assert(DNS_OFFSET_ARCOUNT + 2U <= DNS_HEADER_SIZE);
+    if (edns_payload_size <= DNS_MAX_PACKET_SIZE_UDP_SEND ||
+        *dns_packet_len_p <= DNS_HE
