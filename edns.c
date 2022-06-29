@@ -90,4 +90,10 @@ edns_add_section(struct context *const c,
     assert(edns_payload_size <= (size_t) 0xFFFF);
     assert(DNS_OFFSET_ARCOUNT + 2U <= DNS_HEADER_SIZE);
     if (edns_payload_size <= DNS_MAX_PACKET_SIZE_UDP_SEND ||
-        *dns_packet_len_p <= DNS_HE
+        *dns_packet_len_p <= DNS_HEADER_SIZE) {
+        *request_edns_payload_size = (size_t) 0U;
+        return -1;
+    }
+    if ((dns_packet[DNS_OFFSET_ARCOUNT] |
+         dns_packet[DNS_OFFSET_ARCOUNT + 1U]) != 0U) {
+        co
