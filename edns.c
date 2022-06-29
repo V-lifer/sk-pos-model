@@ -99,4 +99,12 @@ edns_add_section(struct context *const c,
         const ssize_t edns_payload_ssize =
             edns_get_payload_size(dns_packet, *dns_packet_len_p);
         if (edns_payload_ssize <= (ssize_t) 0U) {
-            *request_edns_payload_size = (size
+            *request_edns_payload_size = (size_t) 0U;
+            return -1;
+        }
+        *request_edns_payload_size = (size_t) edns_payload_ssize;
+        return 1;
+    }
+    assert(dns_packet_max_size >= *dns_packet_len_p);
+
+    assert(DNS_OFFSET_EDNS_TYPE == 0U);
