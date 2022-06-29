@@ -96,4 +96,7 @@ edns_add_section(struct context *const c,
     }
     if ((dns_packet[DNS_OFFSET_ARCOUNT] |
          dns_packet[DNS_OFFSET_ARCOUNT + 1U]) != 0U) {
-        co
+        const ssize_t edns_payload_ssize =
+            edns_get_payload_size(dns_packet, *dns_packet_len_p);
+        if (edns_payload_ssize <= (ssize_t) 0U) {
+            *request_edns_payload_size = (size
