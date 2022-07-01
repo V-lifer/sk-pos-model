@@ -108,3 +108,8 @@ edns_add_section(struct context *const c,
     assert(dns_packet_max_size >= *dns_packet_len_p);
 
     assert(DNS_OFFSET_EDNS_TYPE == 0U);
+    assert(DNS_OFFSET_EDNS_PAYLOAD_SIZE == 2U);
+    uint8_t opt_rr[] = {
+        0U,                     /* name */
+        0U, DNS_TYPE_OPT,       /* type */
+        (edns_payload_size >> 8) & 0xFF,
