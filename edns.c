@@ -117,4 +117,10 @@ edns_add_section(struct context *const c,
         0U, 0U                  /* rdlen */
     };
     if (dns_packet_max_size - *dns_packet_len_p < sizeof opt_rr) {
-    
+        *request_edns_payload_size = (size_t) 0U;
+        return -1;
+    }
+
+    assert(dns_packet[DNS_OFFSET_ARCOUNT + 1U] == 0U);
+    dns_packet[DNS_OFFSET_ARCOUNT + 1U] = 1U;
+    memcpy(dns_packet + *dns_packet_len_p, opt_
