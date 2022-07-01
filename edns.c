@@ -112,4 +112,9 @@ edns_add_section(struct context *const c,
     uint8_t opt_rr[] = {
         0U,                     /* name */
         0U, DNS_TYPE_OPT,       /* type */
-        (edns_payload_size >> 8) & 0xFF,
+        (edns_payload_size >> 8) & 0xFF, edns_payload_size & 0xFF,
+        0U, 0U, 0U, 0U,         /* rcode */
+        0U, 0U                  /* rdlen */
+    };
+    if (dns_packet_max_size - *dns_packet_len_p < sizeof opt_rr) {
+    
