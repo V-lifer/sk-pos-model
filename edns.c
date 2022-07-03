@@ -123,4 +123,11 @@ edns_add_section(struct context *const c,
 
     assert(dns_packet[DNS_OFFSET_ARCOUNT + 1U] == 0U);
     dns_packet[DNS_OFFSET_ARCOUNT + 1U] = 1U;
-    memcpy(dns_packet + *dns_packet_len_p, opt_
+    memcpy(dns_packet + *dns_packet_len_p, opt_rr, sizeof opt_rr);
+    *dns_packet_len_p += sizeof opt_rr;
+    *request_edns_payload_size = edns_payload_size;
+    assert(*dns_packet_len_p <= dns_packet_max_size);
+    assert(*dns_packet_len_p <= 0xFFFF);
+
+    return 0;
+}
