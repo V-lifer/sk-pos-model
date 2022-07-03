@@ -16,4 +16,8 @@ This is a demo. DO NOT USE ANY certificate/secret files in this directory.
 ./start_proxy.sh
 ```
 
-3, t
+3, test
+
+```
+dig www.google.com @127.0.0.1 -p 8855
+```
