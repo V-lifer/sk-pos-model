@@ -160,3 +160,163 @@ fpst_insert(FPST *trie, const char *key, size_t len, uint32_t val)
         if (t->bitmap == 0U) {
             /* keep index from the new key */
         } else if (i >= t->idx) {
+            i = t->idx;
+            j = i / 2;
+        } else {
+            saved_node = *t;
+            t->key = key;
+            t->val = val;
+            t->idx = (uint16_t) i;
+            t->bitmap = 0U;
+            t->children = NULL;
+            c = fpst_quadbit_at(lk, i);
+            if (fpst_child_set(t, &saved_node, (size_t) c) != 0) {
+                *t = saved_node;
+                return NULL;
+            }
+            return trie;
+        }
+        prefetch(t->children);
+        c = fpst_quadbit_at(key, i);
+        if (!fpst_bitmap_is_set(t, c)) {
+            break;
+        }
+        t = fpst_child_get(t, (size_t) c);
+    }
+    t->idx = (uint16_t) i;
+    assert(!fpst_bitmap_is_set(t, c));
+    new_node.key = key;
+    new_node.val = val;
+    new_node.idx = 0U;
+    new_node.bitmap = 0U;
+    new_node.children = NULL;
+    if (fpst_child_set(t, &new_node, (size_t) c) != 0) {
+        return NULL;
+    }
+    return trie;
+}
+
+FPST *
+fpst_insert_str(FPST *trie, const char *key, uint32_t val)
+{
+    return fpst_insert(trie, key, strlen(key), val);
+}
+
+int
+fpst_starts_with_existing_key(FPST *trie,
+                              const char *str, size_t len,
+                              const char **found_key_p,
+                              uint32_t *found_val_p)
+{
+    FPST          *t;
+    const char    *lk;
+    size_t         i;
+    size_t         j;
+    unsigned char  c;
+    int            ret = 0;
+
+    if (trie == NULL) {
+        return 0;
+    }
+    t = trie;
+    j = 0U;
+    for (;;) {
+        lk = t->key;
+        for (; j <= len; j++) {
+            if (lk[j] != str[j]) {
+                if (lk[j] == 0) {
+                    *found_key_p = t->key;
+                    *found_val_p = t->val;
+                    ret = 1;
+                }
+                break;
+            }
+        }
+        if (j > len) {
+            *found_key_p = t->key;
+            *found_val_p = t->val;
+            ret = 1;
+            break;
+        }
+        if (t->bitmap == 0U) {
+            break;
+        }
+        i = t->idx;
+        if (i > len * 2) {
+            break;
+        }
+        if (j > i / 2) {
+            j = i / 2;
+        }
+        prefetch(t->children);
+        c = fpst_quadbit_at(str, i);
+        if (!fpst_bitmap_is_set(t, c)) {
+            if (fpst_bitmap_is_set(t, 0U)) {
+                c = 0U;
+            } else {
+                break;
+            }
+        }
+        t = fpst_child_get(t, (size_t) c);
+    }
+    return ret;
+}
+
+int
+fpst_str_starts_with_existing_key(FPST *trie, const char *str,
+                                  const char **found_key_p,
+                                  uint32_t *found_val_p)
+{
+    return fpst_starts_with_existing_key(trie, str, strlen(str),
+                                         found_key_p, found_val_p);
+}
+
+static void
+fpst_free_node(FPST *t, FPST_FreeFn free_kv_fn)
+{
+    size_t count;
+    size_t i;
+
+    if (t->bitmap == 0U) {
+        assert(t->children == NULL);
+    }
+    count = (size_t) popcount(t->bitmap);
+    for (i = 0; i < count; i++) {
+        fpst_free_node(&t->children[i], free_kv_fn);
+    }
+    free(t->children);
+    t->bitmap = 0U;
+    t->children = NULL;
+    free_kv_fn(t->key, t->val);
+    t->key = NULL;
+}
+
+int
+fpst_has_key(FPST *trie, const char *key, size_t len, uint32_t *found_val_p)
+{
+    const char *found_key;
+    int         ret;
+
+    ret = fpst_starts_with_existing_key(trie, key, len,
+                                        &found_key, found_val_p);
+    if (ret > 0 && strlen(found_key) != len) {
+        ret = 0;
+    }
+    return ret;
+}
+
+int
+fpst_has_key_str(FPST *trie, const char *key, uint32_t *found_val_p)
+{
+    return fpst_has_key(trie, key, strlen(key), found_val_p);
+}
+
+void
+fpst_free(FPST *trie, FPST_FreeFn free_kv_fn)
+{
+    if (trie == NULL) {
+        return;
+    }
+    fpst_free_node(trie, free_kv_fn);
+    free(trie);
+}
