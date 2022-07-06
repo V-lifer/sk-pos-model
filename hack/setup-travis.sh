@@ -3,4 +3,10 @@
 set -x
 
 # Install unbound so we can test dnscrypt-wrapper.
-a
+apt-get install -y unbound
+
+# Workaround where the container does not have ::1 but unbound default to
+# binding to localhost (which is both 127.0.0.1 and ::1)
+cat <<EOF > /etc/unbound/unbound.conf
+server:
+    inte
