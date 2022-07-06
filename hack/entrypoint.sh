@@ -5,4 +5,4 @@ set -e
 apt-get install -y libsodium-dev libevent-dev
 
 cd /src/dnscrypt-wrapper
-debuil
+debuild -us -uc
