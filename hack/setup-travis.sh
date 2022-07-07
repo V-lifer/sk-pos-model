@@ -9,4 +9,16 @@ apt-get install -y unbound
 # binding to localhost (which is both 127.0.0.1 and ::1)
 cat <<EOF > /etc/unbound/unbound.conf
 server:
-    inte
+    interface: 127.0.0.1
+remote-control:
+    control-enable: no
+EOF
+service unbound restart
+
+# Wait unbound
+retries=3
+until [ "$retries" -le 0 ]; do
+    nc -n -v -w 3 127.0.0.1 -z 53
+    if [ $? -eq 0 ]; then
+        break
+    f
