@@ -21,4 +21,7 @@ until [ "$retries" -le 0 ]; do
     nc -n -v -w 3 127.0.0.1 -z 53
     if [ $? -eq 0 ]; then
         break
-    f
+    fi
+    sleep 1
+    retries=$((retries-1))
+done
