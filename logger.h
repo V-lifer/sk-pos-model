@@ -22,4 +22,14 @@
 #define	LOG_DEBUG	7           /* debug-level messages */
 #endif
 
-#define L
+#define LOGGER_MAXLEN 8192
+
+/* Configurations. */
+extern int logger_verbosity;
+extern char *logger_logfile;
+
+/* Global Variables. */
+extern int logger_fd;
+
+// see http://stackoverflow.com/q/5588855/288089
+#defin
