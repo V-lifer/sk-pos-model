@@ -32,4 +32,6 @@ extern char *logger_logfile;
 extern int logger_fd;
 
 // see http://stackoverflow.com/q/5588855/288089
-#defin
+#define logger(p, fmt, ...) _logger_with_fileline((p), (fmt), __FILE__, __LINE__, ##__VA_ARGS__)
+void _logger(int priority, const char *fmt, ...);
+void _logger_with_fileline(int priority, const char *fmt, const char 
