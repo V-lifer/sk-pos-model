@@ -294,3 +294,211 @@ parse_cert_files(struct context *c)
 static int
 match_cert_to_keys(struct context *c) {
     size_t keypair_id, signed_cert_id, cert_id;
+
+    c->certs = sodium_allocarray(c->signed_certs_count, sizeof *c->certs);
+    c->certs_count = c->signed_certs_count;
+    cert_id = 0U;
+
+    for(keypair_id=0; keypair_id < c->keypairs_count; keypair_id++) {
+        KeyPair *kp = c->keypairs + keypair_id;
+        int found_cert = 0;
+        for(signed_cert_id=0; signed_cert_id < c->signed_certs_count; signed_cert_id++) {
+            struct SignedCert *signed_cert = c->signed_certs + signed_cert_id;
+            struct Cert *cert = (struct Cert *)signed_cert;
+            if(memcmp(kp->crypt_publickey,
+                      cert->server_publickey,
+                      crypto_box_PUBLICKEYBYTES) == 0) {
+                dnsccert *current_cert = c->certs + cert_id++;
+                found_cert = 1;
+                current_cert->keypair = kp;
+                memcpy(current_cert->magic_query,
+                       cert->magic_query,
+                       sizeof cert->magic_query
+                );
+                memcpy(current_cert->es_version,
+                       cert->version_major,
+                        sizeof cert->version_major
+                );
+#ifndef HAVE_CRYPTO_BOX_CURVE25519XCHACHA20POLY1305_OPEN_EASY
+                if (current_cert->es_version[1] == 0x02) {
+                    logger(LOG_ERR,
+                           "Certificate for XChacha20 but your "
+                           "libsodium version does not support it.");
+                    return 1;
+                }
+#endif
+            }
+        }
+        if (!found_cert) {
+            logger(LOG_ERR,
+                   "could not match secret key %d with a certificate.",
+                   keypair_id + 1);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+#ifndef sodium_base64_VARIANT_URLSAFE_NO_PADDING
+#define EQ(x, y) \
+    ((((0U - ((unsigned int) (x) ^ (unsigned int) (y))) >> 8) & 0xFF) ^ 0xFF)
+#define GT(x, y) ((((unsigned int) (y) - (unsigned int) (x)) >> 8) & 0xFF)
+#define GE(x, y) (GT(y, x) ^ 0xFF)
+#define LT(x, y) GT(y, x)
+
+static int
+b64_byte_to_urlsafe_char(unsigned int x)
+{
+    return (LT(x, 26) & (x + 'A')) |
+           (GE(x, 26) & LT(x, 52) & (x + ('a' - 26))) |
+           (GE(x, 52) & LT(x, 62) & (x + ('0' - 52))) | (EQ(x, 62) & '-') |
+           (EQ(x, 63) & '_');
+}
+
+char *
+sodium_bin2base64(char * const b64, const size_t b64_maxlen,
+                  const unsigned char * const bin, const size_t bin_len,
+                  const int variant)
+{
+    size_t       acc_len = (size_t) 0;
+    size_t       b64_len;
+    size_t       b64_pos = (size_t) 0;
+    size_t       bin_pos = (size_t) 0;
+    size_t       nibbles;
+    size_t       remainder;
+    unsigned int acc = 0U;
+
+    nibbles = bin_len / 3;
+    remainder = bin_len - 3 * nibbles;
+    b64_len = nibbles * 4;
+    if (remainder != 0) {
+        b64_len += 2 + (remainder >> 1);
+    }
+    if (b64_maxlen <= b64_len) {
+        exit(1);
+    }
+    while (bin_pos < bin_len) {
+        acc = (acc << 8) + bin[bin_pos++];
+        acc_len += 8;
+        while (acc_len >= 6) {
+            acc_len -= 6;
+            b64[b64_pos++] = (char) b64_byte_to_urlsafe_char((acc >> acc_len) & 0x3F);
+        }
+    }
+    if (acc_len > 0) {
+        b64[b64_pos++] = (char) b64_byte_to_urlsafe_char((acc << (6 - acc_len)) & 0x3F);
+    }
+    do {
+        b64[b64_pos++] = 0U;
+    } while (b64_pos < b64_maxlen);
+
+    return b64;
+}
+#endif
+
+static char *create_stamp(const char *ext_address, const unsigned char *provider_publickey,
+                          const char *provider_name, bool dnssec, bool nolog, bool nofilter)
+{
+    unsigned char *stamp_bin, *p;
+    char *stamp;
+    unsigned char props[8] = {0};
+    size_t len;
+    size_t ext_address_len = strlen(ext_address),
+           provider_publickey_len = crypto_sign_ed25519_PUBLICKEYBYTES,
+           provider_name_len = strlen(provider_name);
+
+    if (dnssec)
+        props[0] |= 1;
+    if (nolog)
+        props[0] |= 2;
+    if (nofilter)
+        props[0] |= 4;
+    len = 1 + 8 + 1 + ext_address_len + 1 + provider_publickey_len + 1 + provider_name_len;
+    if ((stamp_bin = malloc(len)) == NULL)
+        exit(1);
+    p = stamp_bin;
+    *p++ = 0x01;
+    memcpy(p, props, sizeof props); p += sizeof props;
+    *p++ = (unsigned char) ext_address_len;
+    memcpy(p, ext_address, ext_address_len); p += ext_address_len;
+    *p++ = (unsigned char) provider_publickey_len;
+    memcpy(p, provider_publickey, provider_publickey_len); p += provider_publickey_len;
+    *p++ = (unsigned char) provider_name_len;
+    memcpy(p, provider_name, provider_name_len); p += provider_name_len;
+    if (p - stamp_bin != len) {
+        exit(1);
+    }
+    if ((stamp = malloc(len * 4 / 3 + 2)) == NULL) {
+        exit(1);
+    }
+    sodium_bin2base64(stamp, len * 4 / 3 + 2, stamp_bin, len, 7);
+    free(stamp_bin);
+    return stamp;
+}
+
+int
+main(int argc, const char **argv)
+{
+    struct context c;
+    memset(&c, 0, sizeof(struct context));
+
+    char *blacklist_file = NULL;
+    int gen_provider_keypair = 0;
+    int gen_crypt_keypair = 0;
+    int gen_cert_file = 0;
+    char *cert_file_expire_days = NULL;
+    int provider_publickey = 0;
+    int provider_publickey_dns_records = 0;
+    int verbose = 0;
+    int use_xchacha20 = 0;
+    int nolog = 0, dnssec = 0, nofilter = 0;
+    bool no_tcp = false, no_udp = false;
+    struct argparse argparse;
+    struct argparse_option options[] = {
+        OPT_HELP(),
+        OPT_BOOLEAN(0, "gen-cert-file", &gen_cert_file,
+                    "generate pre-signed certificate"),
+        OPT_BOOLEAN(0, "gen-crypt-keypair", &gen_crypt_keypair,
+                    "generate crypt key pair"),
+        OPT_BOOLEAN(0, "gen-provider-keypair", &gen_provider_keypair,
+                    "generate provider key pair"),
+        OPT_BOOLEAN(0, "show-provider-publickey", &provider_publickey,
+                    "show provider public key"),
+        OPT_BOOLEAN(0, "show-provider-publickey-dns-records", &provider_publickey_dns_records,
+                    "show records for DNS servers"),
+        OPT_STRING(0, "provider-cert-file", &c.provider_cert_file,
+                   "certificate file (default: ./dnscrypt.cert)"),
+        OPT_STRING(0, "provider-name", &c.provider_name, "provider name"),
+        OPT_STRING(0, "provider-publickey-file", &c.provider_publickey_file,
+                   "provider public key file (default: ./public.key)"),
+        OPT_STRING(0, "provider-secretkey-file", &c.provider_secretkey_file,
+                   "provider secret key file (default: ./secret.key)"),
+        OPT_STRING(0, "crypt-secretkey-file", &c.crypt_secretkey_file,
+                   "crypt secret key file (default: ./crypt_secret.key)"),
+        OPT_STRING(0, "cert-file-expire-days", &cert_file_expire_days, "cert file expire days (1d, 2h, 30m, 180s, default: 1d)"),
+        OPT_BOOLEAN(0, "nolog", &nolog, "indicate that the server doesn't store logs"),
+        OPT_BOOLEAN(0, "nofilter", &nofilter, "indicate that the server doesn't enforce its own blacklist"),
+        OPT_BOOLEAN(0, "dnssec", &dnssec, "indicate that the server supports DNSSEC"),
+        OPT_STRING('a', "listen-address", &c.listen_address,
+                   "local address to listen (default: 0.0.0.0:53)"),
+        OPT_BOOLEAN(0, "no-udp", &no_udp, "do not listen on UDP"),
+        OPT_BOOLEAN(0, "no-tcp", &no_tcp, "do not listen on TCP"),
+        OPT_STRING('b', "blacklist-file", &blacklist_file, "blacklist file"),
+        OPT_STRING('E', "ext-address", &c.ext_address, "external IP address"),
+        OPT_STRING('r', "resolver-address", &c.resolver_address,
+                   "upstream dns resolver server (<address:port>)"),
+        OPT_STRING('o', "outgoing-address", &c.outgoing_address,
+                   "address to use to connect to dns resolver server (<address:port>)"),
+        OPT_BOOLEAN('U', "unauthenticated", &c.allow_not_dnscrypted,
+                    "allow and forward unauthenticated queries (default: off)"),
+        OPT_STRING('u', "user", &c.user, "run as given user"),
+        OPT_STRING('l', "logfile", &c.logfile,
+                   "log file path (default: stdout)"),
+        OPT_STRING('p', "pidfile", &c.pidfile, "pid stored file"),
+        OPT_BOOLEAN('d', "daemonize", &c.daemonize,
+                    "run as daemon (default: off)"),
+        OPT_BOOLEAN('V', "verbose", &verbose,
+                    "show verbose logs (specify more -VVV to increase verbosity)"),
+        OPT_BOOLEAN('v', "version", NULL, "show version info", show_version_cb),
+#ifdef HAVE_CRYPTO_BOX_CURVE25519XCHACHA20POLY1305_OPEN_EASY
+        OPT_BOOLEAN('x', "xchacha20", &use_xchacha20, "generate a certificate for use with the xchacha20 cipher"),
