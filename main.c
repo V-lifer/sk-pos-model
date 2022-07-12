@@ -694,3 +694,187 @@ main(int argc, const char **argv)
     }
     memcpy(crypt_secretkey_files, c.crypt_secretkey_file, strlen(c.crypt_secretkey_file) + 1U);
     c.keypairs = sodium_allocarray(c.keypairs_count, sizeof *c.keypairs);
+    keypair_id = 0U;
+    for (crypt_secretkey_file = strtok(crypt_secretkey_files, ",");
+         crypt_secretkey_file != NULL;
+         crypt_secretkey_file = strtok(NULL, ",")) {
+        char fingerprint[80];
+
+        if (read_from_file(crypt_secretkey_file,
+                           (char *)c.keypairs[keypair_id].crypt_secretkey,
+                           crypto_box_SECRETKEYBYTES) != 0) {
+            logger(LOG_ERR, "Unable to read %s", crypt_secretkey_file);
+            exit(1);
+        }
+        if (crypto_scalarmult_base(c.keypairs[keypair_id].crypt_publickey,
+                                   c.keypairs[keypair_id].crypt_secretkey) != 0)
+            exit(1);
+        dnscrypt_key_to_fingerprint(fingerprint, c.keypairs[keypair_id].crypt_publickey);
+        logger(LOG_INFO, "Crypt public key fingerprint for %s: %s",
+               crypt_secretkey_file, fingerprint);
+        keypair_id++;
+    }
+    free(crypt_secretkey_files);
+
+    // generate signed certificate
+    if (gen_cert_file) {
+        if (c.keypairs_count != 1U) {
+            logger(LOG_ERR, "A certificate can only store a single key");
+            exit(1);
+        }
+        if (read_from_file
+            (c.provider_publickey_file, (char *)c.provider_publickey,
+             crypto_sign_ed25519_PUBLICKEYBYTES) == 0
+            && read_from_file(c.provider_secretkey_file,
+                              (char *)c.provider_secretkey,
+                              crypto_sign_ed25519_SECRETKEYBYTES) == 0) {
+        } else {
+            logger(LOG_ERR, "Unable to load master keys from %s and %s.",
+                   c.provider_publickey_file, c.provider_secretkey_file);
+            exit(1);
+        }
+        int cert_file_expire_seconds = CERT_FILE_EXPIRE_DAYS * 24 * 3600;
+        if (cert_file_expire_days != NULL) {
+           if (seconds_from_string(cert_file_expire_days, &cert_file_expire_seconds) != 0) {
+               logger(LOG_ERR, "Unable to parse expire time string: %s", cert_file_expire_days);
+               exit(1);
+           }
+        }
+        logger(LOG_NOTICE, "Generating pre-signed certificate (expire in %d seconds).", cert_file_expire_seconds);
+        struct SignedCert *signed_cert =
+            cert_build_cert(c.keypairs->crypt_publickey, cert_file_expire_seconds, use_xchacha20);
+        if (!signed_cert || cert_sign(signed_cert, c.provider_secretkey) != 0) {
+            logger(LOG_NOTICE, "Failed.");
+            exit(1);
+        }
+        logger(LOG_NOTICE, "TXT record for signed-certificate:");
+        printf("* Record for nsd:\n");
+        cert_display_txt_record(signed_cert);
+        printf("\n");
+        printf("* Record for tinydns:\n");
+        cert_display_txt_record_tinydns(signed_cert);
+        printf("\n");
+        if (write_to_file
+            (c.provider_cert_file, (char *)signed_cert,
+             sizeof(struct SignedCert)) != 0) {
+            logger(LOG_ERR, "The new certificate was not saved - "
+                   "Maybe the %s file already exists - please delete it first.",
+                   c.provider_cert_file);
+            exit(1);
+        }
+        logger(LOG_NOTICE, "Certificate stored in %s.", c.provider_cert_file);
+        exit(0);
+    }
+
+    if (!c.resolver_address) {
+        logger(LOG_ERR, "You must specify --resolver-address.\n\n");
+        argparse_usage(&argparse);
+        exit(0);
+    }
+
+    if (blacklist_file != NULL && blocking_init(&c, blacklist_file) != 0) {
+        logger(LOG_ERR, "Unable to load the blacklist file");
+        exit(1);
+    }
+
+    c.udp_listener_handle = -1;
+    c.udp_resolver_handle = -1;
+
+    if (c.user) {
+        struct passwd *pw = getpwnam(c.user);
+        if (pw == NULL) {
+            logger(LOG_ERR, "Unknown user: [%s]", c.user);
+            exit(1);
+        }
+        c.user_id = pw->pw_uid;
+        c.user_group = pw->pw_gid;
+        c.user_dir = strdup(pw->pw_dir);
+    }
+
+    if (!c.provider_name) {
+        logger(LOG_ERR, "You must specify --provider-name");
+        exit(1);
+    }
+
+    if (parse_cert_files(&c)) {
+        exit(1);
+    }
+    if (match_cert_to_keys(&c)) {
+        exit(1);
+    }
+    if (c.signed_certs_count <= 0U) {
+        logger(LOG_ERR, "You must specify --provider-cert-file.\n\n");
+        argparse_usage(&argparse);
+        exit(1);
+    }
+    if (filter_signed_certs(&c)) {
+        exit(1);
+    }
+    if (c.signed_certs_count <= 0U) {
+        logger(LOG_ERR, "No (currently) valid certs found.\n\n");
+        exit(1);
+    }
+    for (int i = 0; i < c.signed_certs_count; i++) {
+        uint32_t ts_end, ts_begin;
+        memcpy(&ts_begin, c.signed_certs[i].ts_begin, 4);
+        memcpy(&ts_end, c.signed_certs[i].ts_end, 4);
+        ts_begin = ntohl(ts_begin);
+        ts_end = ntohl(ts_end);
+        logger(LOG_INFO, "Signed certs %d valid from %d to %d", i, ts_begin, ts_end);
+    }
+
+    if (c.daemonize) {
+        do_daemonize();
+    }
+    if (c.pidfile) {
+        pidfile_create(c.pidfile);
+    }
+
+    if (sockaddr_from_ip_and_port(&c.resolver_sockaddr,
+                                  &c.resolver_sockaddr_len,
+                                  c.resolver_address,
+                                  "53", "Unsupported resolver address") != 0) {
+        exit(1);
+    }
+
+    if (c.outgoing_address &&
+        sockaddr_from_ip_and_port(&c.outgoing_sockaddr,
+                                  &c.outgoing_sockaddr_len,
+                                  c.outgoing_address,
+                                  "0", "Unsupported outgoing address") != 0) {
+        exit(1);
+    }
+
+    if (sockaddr_from_ip_and_port(&c.local_sockaddr,
+                                  &c.local_sockaddr_len,
+                                  c.listen_address,
+                                  "53", "Unsupported local address") != 0) {
+        exit(1);
+    }
+
+    randombytes_buf(c.hash_key, sizeof c.hash_key);
+
+    if ((c.event_loop = event_base_new()) == NULL) {
+        logger(LOG_ERR, "Unable to initialize the event loop.");
+        exit(1);
+    }
+
+	if (!no_udp && udp_listener_bind(&c) != 0) {
+        logger(LOG_ERR, "Failed to bind UDP listener on %s", c.listen_address);
+        exit(1);
+	}
+
+    if (!no_tcp && tcp_listener_bind(&c) != 0) {
+        logger(LOG_ERR, "Failed to bind TCP listener on %s", c.listen_address);
+        exit(1);
+    }
+
+    if (!no_udp && udp_listener_start(&c) != 0) {
+        logger(LOG_ERR, "Unable to start UDP listener on %s", c.listen_address);
+        exit(1);
+    }
+
+    if (!no_tcp && tcp_listener_start(&c) != 0) {
+        logger(LOG_ERR, "Unable to start TCP listener on %s", c.listen_address);
+        exit(1);
+    }
