@@ -878,3 +878,16 @@ main(int argc, const char **argv)
         logger(LOG_ERR, "Unable to start TCP listener on %s", c.listen_address);
         exit(1);
     }
+
+    revoke_privileges(&c);
+
+    event_base_dispatch(c.event_loop);
+
+    logger(LOG_INFO, "Stopping proxy");
+    udp_listener_stop(&c);
+    tcp_listener_stop(&c);
+    event_base_free(c.event_loop);
+    blocking_free(&c);
+
+    return 0;
+}
