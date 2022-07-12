@@ -502,3 +502,195 @@ main(int argc, const char **argv)
         OPT_BOOLEAN('v', "version", NULL, "show version info", show_version_cb),
 #ifdef HAVE_CRYPTO_BOX_CURVE25519XCHACHA20POLY1305_OPEN_EASY
         OPT_BOOLEAN('x', "xchacha20", &use_xchacha20, "generate a certificate for use with the xchacha20 cipher"),
+#endif
+        OPT_END(),
+    };
+
+    argparse_init(&argparse, options, config_usage, 0);
+    argparse_parse(&argparse, argc, argv);
+
+    if (no_udp && no_tcp) {
+        fprintf(stderr,
+                "Error: UDP/TCP listeners are both disabled\n\n");
+        argparse_usage(&argparse);
+        exit(1);
+    }
+
+
+    if (sodium_init() != 0) {
+        return 1;
+    }
+
+    debug_init();
+
+    if (!c.listen_address)
+        c.listen_address = "0.0.0.0:53";
+
+    if (!c.crypt_secretkey_file)
+        c.crypt_secretkey_file = "crypt_secret.key";
+
+    if (!c.provider_publickey_file)
+        c.provider_publickey_file = "public.key";
+
+    if (!c.provider_secretkey_file)
+        c.provider_secretkey_file = "secret.key";
+
+    if (!c.provider_cert_file)
+        c.provider_cert_file = "dnscrypt.cert";
+
+    c.keypairs = NULL;
+
+    if (gen_provider_keypair) {
+        uint8_t provider_publickey[crypto_sign_ed25519_PUBLICKEYBYTES];
+        uint8_t provider_secretkey[crypto_sign_ed25519_SECRETKEYBYTES];
+
+        if (!dnssec) {
+            fprintf(stderr,
+                    "Warning: do not forget to add --dnssec if your server supports DNSSEC\n\n");
+        }
+        if (!nolog) {
+            fprintf(stderr,
+                    "Warning: do not forget to add --nolog if your server doesn't store logs\n\n");
+        }
+        if (!nofilter) {
+            fprintf(stderr,
+                    "Warning: do not forget to add --nofilter if your server doesn't intentionally block domains\n\n");
+        }
+        if (!c.provider_name) {
+            fprintf(stderr,
+                    "Missing provider name. Ex: --provider-name=2.dnscrypt-cert.example.com\n");
+            exit(1);
+        }
+        if (!c.ext_address || strncmp(c.ext_address, "0.", 2) == 0) {
+            fprintf(stderr,
+                    "Missing external address. Ex: --ext-address=192.168.1.1\n");
+            exit(1);
+        }
+
+        printf("Generate provider key pair...");
+        fflush(stdout);
+        if (crypto_sign_ed25519_keypair(provider_publickey, provider_secretkey) == 0) {
+            char fingerprint[80];
+            char *stamp;
+
+            puts(" ok.\n");
+            stamp = create_stamp(c.ext_address, provider_publickey, c.provider_name, dnssec, nolog, nofilter);
+            dnscrypt_key_to_fingerprint(fingerprint, provider_publickey);
+
+            printf("Stamp for dnscrypt-proxy 2.x:\n"
+                   "  sdns://%s\n\n"
+                   "Parameters for dnscrypt-proxy 1.x:\n"
+                   "  dnscrypt-proxy --provider-key=%s\n"
+                   "                 --resolver-address=%s\n"
+                   "                 --provider-name=%s\n",
+                   stamp,
+                   fingerprint, c.ext_address, c.provider_name);
+            if (write_to_file
+                (c.provider_publickey_file, (char *)provider_publickey,
+                 crypto_sign_ed25519_PUBLICKEYBYTES) == 0
+                && write_to_pkey(c.provider_secretkey_file, (char *)provider_secretkey,
+                                 crypto_sign_ed25519_SECRETKEYBYTES) == 0) {
+                printf("Keys are stored in %s & %s.\n",
+                       c.provider_publickey_file, c.provider_secretkey_file);
+                exit(0);
+            }
+            printf("\n\n*KEYS HAVE NOT BEEN SAVED*\n\nA provider key pair already exists.\n"
+                   "If you really want to overwrite it, delete the %s and %s files.\n\n"
+                   "The provider public key is what client give to dnscrypt-proxy\n"
+                   "in order to use your service (long-term key).\n\n"
+                   "Unless the private key has been compromised, you probably do not\n"
+                   "want to overwrite it with a new one.\n\n"
+                   "Usually, what you want (if current certificates are about to expire)\n"
+                   "to regenerate is the server key pairs (--gen-crypt-keypair),\n"
+                   "not the master keys.\n",
+                   c.provider_publickey_file, c.provider_secretkey_file);
+            exit(1);
+        } else {
+            printf(" failed.\n");
+            exit(1);
+        }
+    }
+    if (provider_publickey_dns_records) {
+        if (parse_cert_files(&c) || filter_signed_certs(&c)) {
+            exit(1);
+        }
+        logger(LOG_NOTICE, "TXT record for signed-certificate:");
+        printf("* Record for nsd:\n");
+        for(int i=0; i < c.signed_certs_count; i++){
+            cert_display_txt_record(c.signed_certs + i);
+            printf("\n");
+        }
+        printf("* Record for tinydns:\n");
+        for(int i=0; i < c.signed_certs_count; i++){
+            cert_display_txt_record_tinydns(c.signed_certs + i);
+            printf("\n");
+        }
+        exit(0);
+    }
+
+    if (provider_publickey) {
+        char fingerprint[80];
+
+        if (read_from_file(c.provider_publickey_file,
+                           (char *)c.provider_publickey,
+                           crypto_sign_ed25519_PUBLICKEYBYTES) != 0) {
+            logger(LOG_ERR, "Unable to read %s", c.provider_publickey_file);
+            exit(1);
+        }
+        dnscrypt_key_to_fingerprint(fingerprint, c.provider_publickey);
+        printf("Provider public key: %s\n", fingerprint);
+        exit(0);
+    }
+
+    if (gen_crypt_keypair) {
+        printf("Generate crypt key pair...");
+        fflush(stdout);
+        if ((c.keypairs = sodium_malloc(sizeof *c.keypairs)) == NULL)
+            exit(1);
+        if (crypto_box_keypair(c.keypairs->crypt_publickey,
+                               c.keypairs->crypt_secretkey) == 0) {
+            printf(" ok.\n");
+            if (write_to_pkey(c.crypt_secretkey_file,
+                              (char *)c.keypairs->crypt_secretkey,
+                              crypto_box_SECRETKEYBYTES) == 0) {
+                printf("Secret key stored in %s\n",
+                       c.crypt_secretkey_file);
+                exit(0);
+            }
+            logger(LOG_ERR, "The new certificate was not saved - "
+                   "Maybe the %s file already exists - please delete it first.",
+                   c.crypt_secretkey_file);
+            exit(1);
+        } else {
+            printf(" failed.\n");
+            exit(1);
+        }
+    }
+
+    // setup logger
+    if (c.logfile) {
+        logger_logfile = c.logfile;
+    }
+    logger_verbosity = LOG_NOTICE;  // default
+    logger_verbosity += verbose;
+    if (logger_verbosity > LOG_DEBUG)
+        logger_verbosity = LOG_DEBUG;
+
+    char *crypt_secretkey_files, *crypt_secretkey_file;
+    size_t keypair_id;
+
+    c.keypairs_count = 0U;
+    if ((crypt_secretkey_files = strdup(c.crypt_secretkey_file)) == NULL)
+        exit(1);
+    for (crypt_secretkey_file = strtok(crypt_secretkey_files, ",");
+         crypt_secretkey_file != NULL;
+         crypt_secretkey_file = strtok(NULL, ",")) {
+        c.keypairs_count++;
+    }
+    if (c.keypairs_count <= 0U) {
+        logger(LOG_ERR, "You must specify --crypt-secretkey-file.\n\n");
+        argparse_usage(&argparse);
+        exit(0);
+    }
+    memcpy(crypt_secretkey_files, c.crypt_secretkey_file, strlen(c.crypt_secretkey_file) + 1U);
+    c.keypairs = sodium_allocarray(c.keypairs_count, sizeof *c.keypairs);
