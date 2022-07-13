@@ -24,4 +24,14 @@ pidfile_sig_exit_handler(int sig)
     (void)sig;
     if (exit_requested)
         return;
-    exit_request
+    exit_requested = 1;
+    exit(0);
+}
+
+static void
+pidfile_install_signal_handlers(void (*handler) (int))
+{
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGALRM, handler);
+    signal(SIGHUP, handler);
+    signal(SIGINT, handler
