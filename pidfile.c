@@ -7,4 +7,21 @@ static void
 pidfile_remove_file(void)
 {
     if (_pidfile != NULL) {
-        unlink(_pidf
+        unlink(_pidfile);
+        _pidfile = NULL;
+    }
+}
+
+static void
+pidfile_atexit_handler(void)
+{
+    pidfile_remove_file();
+}
+
+static void
+pidfile_sig_exit_handler(int sig)
+{
+    (void)sig;
+    if (exit_requested)
+        return;
+    exit_request
