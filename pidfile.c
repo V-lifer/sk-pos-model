@@ -34,4 +34,15 @@ pidfile_install_signal_handlers(void (*handler) (int))
     signal(SIGPIPE, SIG_IGN);
     signal(SIGALRM, handler);
     signal(SIGHUP, handler);
-    signal(SIGINT, handler
+    signal(SIGINT, handler);
+    signal(SIGQUIT, handler);
+    signal(SIGTERM, handler);
+#ifdef SIGXCPU
+    signal(SIGXCPU, handler);
+#endif
+}
+
+int
+pidfile_create(const char *const pidfile)
+{
+    FILE *fp;
