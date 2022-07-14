@@ -56,4 +56,7 @@ pidfile_create(const char *const pidfile)
     fprintf(fp, "%d\n", (int)getpid());
     fclose(fp);
 
-    pidfile_install_signal_handlers(pidfile_sig_e
+    pidfile_install_signal_handlers(pidfile_sig_exit_handler);
+    atexit(pidfile_atexit_handler);
+    return 0;
+}
