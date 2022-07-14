@@ -46,3 +46,14 @@ int
 pidfile_create(const char *const pidfile)
 {
     FILE *fp;
+    _pidfile = pidfile;
+
+    fp = fopen(pidfile, "w");
+    if (!fp) {
+        return -1;
+    }
+
+    fprintf(fp, "%d\n", (int)getpid());
+    fclose(fp);
+
+    pidfile_install_signal_handlers(pidfile_sig_e
