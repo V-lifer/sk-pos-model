@@ -26,4 +26,10 @@ safe_write(const int fd, const void *const buf_, size_t count,
     while (count > (size_t) 0) {
         while ((written = write(fd, buf, count)) <= (ssize_t) 0) {
             if (errno == EAGAIN) {
-                if (poll(&pfd, (nfds_t) 1, timeo
+                if (poll(&pfd, (nfds_t) 1, timeout) == 0) {
+                    errno = ETIMEDOUT;
+                    goto ret;
+                }
+            } else if (errno != EINTR) {
+                goto ret;
+            }
