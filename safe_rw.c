@@ -33,3 +33,13 @@ safe_write(const int fd, const void *const buf_, size_t count,
             } else if (errno != EINTR) {
                 goto ret;
             }
+        }
+        buf += written;
+        count -= (size_t) written;
+    }
+ret:
+    return (ssize_t) (buf - (const char *)buf_);
+}
+
+ssize_t
+safe_read(const int fd, void *const buf_, size_t cou
