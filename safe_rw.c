@@ -23,4 +23,7 @@ safe_write(const int fd, const void *const buf_, size_t count,
     pfd.fd = fd;
     pfd.events = POLLOUT;
 
-    wh
+    while (count > (size_t) 0) {
+        while ((written = write(fd, buf, count)) <= (ssize_t) 0) {
+            if (errno == EAGAIN) {
+                if (poll(&pfd, (nfds_t) 1, timeo
