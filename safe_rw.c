@@ -42,4 +42,13 @@ ret:
 }
 
 ssize_t
-safe_read(const int fd, void *const buf_, size_t cou
+safe_read(const int fd, void *const buf_, size_t count)
+{
+    unsigned char *buf = (unsigned char *)buf_;
+    ssize_t readnb;
+
+    do {
+        while ((readnb = read(fd, buf, count)) < (ssize_t) 0 && errno == EINTR);
+        if (readnb < (ssize_t) 0) {
+            return readnb;
+ 
