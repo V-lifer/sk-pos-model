@@ -68,4 +68,15 @@ safe_read_partial(const int fd, void *const buf_, const size_t max_count)
     unsigned char *const buf = (unsigned char *)buf_;
     ssize_t readnb;
 
-    while ((readnb = 
+    while ((readnb = read(fd, buf, max_count)) < (ssize_t) 0 && errno == EINTR);
+
+    return readnb;
+}
+
+#else /* _WIN32 */
+
+ssize_t
+safe_write(const int fd, const void *const buf_, size_t count,
+           const int timeout)
+{
+  
