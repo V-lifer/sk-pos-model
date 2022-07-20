@@ -51,4 +51,12 @@ safe_read(const int fd, void *const buf_, size_t count)
         while ((readnb = read(fd, buf, count)) < (ssize_t) 0 && errno == EINTR);
         if (readnb < (ssize_t) 0) {
             return readnb;
- 
+        }
+        if (readnb == (ssize_t) 0) {
+            break;
+        }
+        count -= (size_t) readnb;
+        buf += readnb;
+    } while (count > (ssize_t) 0);
+
+    return (ssize_t) 
