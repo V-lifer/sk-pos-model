@@ -79,4 +79,15 @@ ssize_t
 safe_write(const int fd, const void *const buf_, size_t count,
            const int timeout)
 {
-  
+    assert(fd != -1);
+    assert(buf_ != NULL);
+    assert(count > (size_t) 0U);
+    (void)timeout;
+
+    return -1;
+}
+
+ssize_t
+safe_read(const int fd, void *const buf_, size_t count)
+{
+    
