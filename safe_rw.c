@@ -101,4 +101,10 @@ ssize_t
 safe_read_partial(const int fd, void *const buf_, const size_t max_count)
 {
     assert(fd != -1);
-    assert(buf_ != NULL
+    assert(buf_ != NULL);
+    assert(max_count > (size_t) 0U);
+
+    return -1;
+}
+
+#endif
