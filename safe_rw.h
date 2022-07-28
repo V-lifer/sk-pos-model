@@ -6,4 +6,11 @@
 #include <errno.h>
 #include <poll.h>
 #include <stdlib.h>
-#include <uni
+#include <unistd.h>
+
+ssize_t safe_write(const int fd, const void *const buf_, size_t count,
+                   const int timeout);
+
+ssize_t safe_read(const int fd, void *const buf_, size_t count);
+
+ssize
