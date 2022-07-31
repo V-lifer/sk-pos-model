@@ -16,4 +16,10 @@ tcp_request_kill(TCPRequest *const tcp_request)
     }
     if (tcp_request->client_proxy_bev != NULL) {
         bufferevent_free(tcp_request->client_proxy_bev);
-        tcp_request->client_prox
+        tcp_request->client_proxy_bev = NULL;
+    }
+    if (tcp_request->proxy_resolver_bev != NULL) {
+        bufferevent_free(tcp_request->proxy_resolver_bev);
+        tcp_request->proxy_resolver_bev = NULL;
+    }
+    if (
