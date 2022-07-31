@@ -11,4 +11,9 @@ tcp_request_kill(TCPRequest *const tcp_request)
     struct context *c;
 
     if (tcp_request->timeout_timer != NULL) {
-        event_free(tcp_
+        event_free(tcp_request->timeout_timer);
+        tcp_request->timeout_timer = NULL;
+    }
+    if (tcp_request->client_proxy_bev != NULL) {
+        bufferevent_free(tcp_request->client_proxy_bev);
+        tcp_request->client_prox
