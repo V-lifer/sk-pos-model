@@ -26,4 +26,8 @@ tcp_request_kill(TCPRequest *const tcp_request)
         evbuffer_free(tcp_request->proxy_resolver_query_evbuf);
         tcp_request->proxy_resolver_query_evbuf = NULL;
     }
-    c = tcp_request->conte
+    c = tcp_request->context;
+    if (tcp_request->status.is_in_queue != 0) {
+        debug_assert(!TAILQ_EMPTY(&c->tcp_request_queue));
+        TAILQ_REMOVE(&c->tcp_request_queue, tcp_request, queue);
+        debug_assert(c->connections >
