@@ -44,4 +44,8 @@ tcp_tune(evutil_socket_t handle)
         return;
     }
 
-    setsockop
+    setsockopt(handle, IPPROTO_IP, IP_TOS, (void *) (int []) {
+               0x70}, sizeof(int));
+#ifdef TCP_QUICKACK
+    setsockopt(handle, IPPROTO_TCP, TCP_QUICKACK, (void *)(int[]) {
+               1}, sizeof(int))
