@@ -30,4 +30,18 @@ tcp_request_kill(TCPRequest *const tcp_request)
     if (tcp_request->status.is_in_queue != 0) {
         debug_assert(!TAILQ_EMPTY(&c->tcp_request_queue));
         TAILQ_REMOVE(&c->tcp_request_queue, tcp_request, queue);
-        debug_assert(c->connections >
+        debug_assert(c->connections > 0U);
+        c->connections--;
+    }
+    tcp_request->context = NULL;
+    free(tcp_request);
+}
+
+static void
+tcp_tune(evutil_socket_t handle)
+{
+    if (handle == -1) {
+        return;
+    }
+
+    setsockop
