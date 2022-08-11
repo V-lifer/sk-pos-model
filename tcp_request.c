@@ -61,4 +61,15 @@ tcp_tune(evutil_socket_t handle)
 
 static void
 timeout_timer_cb(evutil_socket_t timeout_timer_handle, short ev_flags,
-                 void *const tcp_
+                 void *const tcp_request_)
+{
+    TCPRequest *const tcp_request = tcp_request_;
+
+    (void)ev_flags;
+    (void)timeout_timer_handle;
+    logger(LOG_DEBUG, "resolver timeout (TCP)");
+    tcp_request_kill(tcp_request);
+}
+
+int
+tcp_l
