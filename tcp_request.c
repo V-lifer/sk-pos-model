@@ -54,4 +54,11 @@ tcp_tune(evutil_socket_t handle)
                1}, sizeof(int));
 #endif
 #if defined(__linux__) && defined(SO_REUSEPORT)
-    setsockopt(handle, SOL_SOCKET, 
+    setsockopt(handle, SOL_SOCKET, SO_REUSEPORT, (void *)(int[]) {
+               1}, sizeof(int));
+#endif
+}
+
+static void
+timeout_timer_cb(evutil_socket_t timeout_timer_handle, short ev_flags,
+                 void *const tcp_
