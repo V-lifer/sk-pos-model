@@ -90,4 +90,7 @@ static int
 self_serve_cert_file(struct context *c, struct dns_header *header,
                      size_t dns_query_len, size_t max_len, TCPRequest *tcp_request)
 {
-    uint8_t dns_query_len_buf
+    uint8_t dns_query_len_buf[2];
+    if (dnscrypt_self_serve_cert_file(c, header, &dns_query_len, max_len) == 0) {
+        dns_query_len_buf[0] = (dns_query_len >> 8) & 0xff;
+        dns_query_len_buf[1] = dns_query_len & 
