@@ -93,4 +93,8 @@ self_serve_cert_file(struct context *c, struct dns_header *header,
     uint8_t dns_query_len_buf[2];
     if (dnscrypt_self_serve_cert_file(c, header, &dns_query_len, max_len) == 0) {
         dns_query_len_buf[0] = (dns_query_len >> 8) & 0xff;
-        dns_query_len_buf[1] = dns_query_len & 
+        dns_query_len_buf[1] = dns_query_len & 0xff;
+        if (bufferevent_write(tcp_request->client_proxy_bev,
+                        dns_query_len_buf, (size_t) 2U) != 0 ||
+            bufferevent_write(tcp_request->client_proxy_bev, (void *)header,
+                  
