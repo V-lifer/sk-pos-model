@@ -72,4 +72,14 @@ timeout_timer_cb(evutil_socket_t timeout_timer_handle, short ev_flags,
 }
 
 int
-tcp_l
+tcp_listener_kill_oldest_request(struct context *c)
+{
+    if (TAILQ_EMPTY(&c->tcp_request_queue)) {
+        return -1;
+    }
+    tcp_request_kill(TAILQ_FIRST(&c->tcp_request_queue));
+
+    return 0;
+}
+
+
