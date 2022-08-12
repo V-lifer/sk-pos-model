@@ -83,3 +83,11 @@ tcp_listener_kill_oldest_request(struct context *c)
 }
 
 
+/**
+ * Return 0 if served.
+ */
+static int
+self_serve_cert_file(struct context *c, struct dns_header *header,
+                     size_t dns_query_len, size_t max_len, TCPRequest *tcp_request)
+{
+    uint8_t dns_query_len_buf
