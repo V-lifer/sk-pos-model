@@ -102,4 +102,12 @@ self_serve_cert_file(struct context *c, struct dns_header *header,
             return -1;
         }
         bufferevent_enable(tcp_request->client_proxy_bev, EV_WRITE);
-        bufferevent_free(tcp_r
+        bufferevent_free(tcp_request->proxy_resolver_bev);
+        tcp_request->proxy_resolver_bev = NULL;
+        return 0;
+    }
+    return -1;
+}
+
+static void
+client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
