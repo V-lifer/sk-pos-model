@@ -116,4 +116,9 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     const size_t sizeof_dns_query = DNS_MAX_PACKET_SIZE_TCP - 2U;
     static uint8_t *dns_query = NULL;
     uint8_t dns_query_len_buf[2];
-    uint8_t dns_curve
+    uint8_t dns_curved_query_len_buf[2];
+    TCPRequest *tcp_request = tcp_request_;
+    struct context *c = tcp_request->context;
+    struct evbuffer *input = bufferevent_get_input(client_proxy_bev);
+    size_t available_size;
+    size_t
