@@ -121,4 +121,11 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     struct context *c = tcp_request->context;
     struct evbuffer *input = bufferevent_get_input(client_proxy_bev);
     size_t available_size;
-    size_t
+    size_t dns_query_len;
+    size_t max_query_size;
+
+    if (dns_query == NULL && (dns_query = sodium_malloc(sizeof_dns_query)) == NULL) {
+        return;
+    }
+    if (tcp_request->status.has_dns_query_len == 0) {
+        debug_assert(ev
