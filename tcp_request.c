@@ -111,3 +111,9 @@ self_serve_cert_file(struct context *c, struct dns_header *header,
 
 static void
 client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
+                     void *const tcp_request_)
+{
+    const size_t sizeof_dns_query = DNS_MAX_PACKET_SIZE_TCP - 2U;
+    static uint8_t *dns_query = NULL;
+    uint8_t dns_query_len_buf[2];
+    uint8_t dns_curve
