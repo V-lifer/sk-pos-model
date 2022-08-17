@@ -128,4 +128,7 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
         return;
     }
     if (tcp_request->status.has_dns_query_len == 0) {
-        debug_assert(ev
+        debug_assert(evbuffer_get_length(input) >= (size_t) 2U);
+        evbuffer_remove(input, dns_query_len_buf, sizeof dns_query_len_buf);
+        tcp_request->dns_query_len = (size_t)
+            ((dns_query_l
