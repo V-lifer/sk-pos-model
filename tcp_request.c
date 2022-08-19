@@ -135,4 +135,11 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
         tcp_request->status.has_dns_query_len = 1;
     }
     debug_assert(tcp_request->status.has_dns_query_len != 0);
-    dns_query_len = tcp_request->dns_query_
+    dns_query_len = tcp_request->dns_query_len;
+    if (dns_query_len < (size_t) DNS_HEADER_SIZE) {
+        logger(LOG_DEBUG, "Short query received");
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    available_size = evbuffer_get_length(input);
+   
