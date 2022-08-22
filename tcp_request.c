@@ -150,4 +150,10 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     debug_assert(available_size >= dns_query_len);
     bufferevent_disable(tcp_request->client_proxy_bev, EV_READ);
     debug_assert(tcp_request->proxy_resolver_query_evbuf == NULL);
-    if ((tcp_request->proxy_resolver_quer
+    if ((tcp_request->proxy_resolver_query_evbuf = evbuffer_new()) == NULL) {
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    if ((ssize_t)
+        evbuffer_remove_buffer(input, tcp_request->proxy_resolver_query_evbuf,
+                  
