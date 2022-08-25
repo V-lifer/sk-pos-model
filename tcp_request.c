@@ -176,4 +176,9 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     if (max_len > max_query_size) {
         max_len = max_query_size;
     }
-    if (dns_quer
+    if (dns_query_len + DNSCRYPT_QUERY_HEADER_SIZE > max_len) {
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    debug_assert(max_len <= DNS_MAX_PACKET_SIZE_TCP - 2U);
+    debug_assert(max_len <= sizeof
