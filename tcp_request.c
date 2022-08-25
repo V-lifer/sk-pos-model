@@ -181,4 +181,10 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
         return;
     }
     debug_assert(max_len <= DNS_MAX_PACKET_SIZE_TCP - 2U);
-    debug_assert(max_len <= sizeof
+    debug_assert(max_len <= sizeof_dns_query);
+    debug_assert(dns_query_len <= max_len);
+
+    // decrypt if encrypted
+    struct dnscrypt_query_header *dnscrypt_header =
+        (struct dnscrypt_query_header *)dns_query;
+    debug_assert(size
