@@ -190,4 +190,9 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     debug_assert(sizeof c->keypairs[0].crypt_publickey >= DNSCRYPT_MAGIC_HEADER_LEN);
     if ((tcp_request->cert =
          find_cert(c, dnscrypt_header->magic_query, dns_query_len)) == NULL) {
-        tcp_request->is_d
+        tcp_request->is_dnscrypted = false;
+    } else {
+        if (dnscrypt_server_uncurve(c, tcp_request->cert,
+                                    tcp_request->client_nonce,
+                                    tcp_request->nmkey, dns_query,
+        
