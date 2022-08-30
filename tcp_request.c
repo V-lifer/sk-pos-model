@@ -187,4 +187,7 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     // decrypt if encrypted
     struct dnscrypt_query_header *dnscrypt_header =
         (struct dnscrypt_query_header *)dns_query;
-    debug_assert(size
+    debug_assert(sizeof c->keypairs[0].crypt_publickey >= DNSCRYPT_MAGIC_HEADER_LEN);
+    if ((tcp_request->cert =
+         find_cert(c, dnscrypt_header->magic_query, dns_query_len)) == NULL) {
+        tcp_request->is_d
