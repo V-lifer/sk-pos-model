@@ -204,4 +204,9 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
     }
 
     struct dns_header *header = (struct dns_header *)dns_query;
-    // self serve signed certificate for provider 
+    // self serve signed certificate for provider name?
+    if (!tcp_request->is_dnscrypted) {
+        if (self_serve_cert_file(c, header, dns_query_len, sizeof_dns_query, tcp_request) == 0)
+            return;
+        if (!c->allow_not_dnscrypted) {
+           
