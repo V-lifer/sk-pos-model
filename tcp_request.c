@@ -197,4 +197,11 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
                                     tcp_request->nmkey, dns_query,
                                     &dns_query_len) != 0 || dns_query_len < DNS_HEADER_SIZE) {
             logger(LOG_DEBUG, "Received a suspicious query from the client");
-            tcp_request_kill(
+            tcp_request_kill(tcp_request);
+            return;
+        }
+        tcp_request->is_dnscrypted = true;
+    }
+
+    struct dns_header *header = (struct dns_header *)dns_query;
+    // self serve signed certificate for provider 
