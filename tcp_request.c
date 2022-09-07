@@ -215,4 +215,9 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
         }
     }
 
-    tcp_request->is_blocked = is_blocked(c, header
+    tcp_request->is_blocked = is_blocked(c, header, dns_query_len);
+
+    dns_curved_query_len_buf[0] = (dns_query_len >> 8) & 0xff;
+    dns_curved_query_len_buf[1] = dns_query_len & 0xff;
+    if (bufferevent_write(tcp_request->proxy_resolver_bev,
+         
