@@ -209,4 +209,10 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
         if (self_serve_cert_file(c, header, dns_query_len, sizeof_dns_query, tcp_request) == 0)
             return;
         if (!c->allow_not_dnscrypted) {
-           
+            logger(LOG_DEBUG, "Unauthenticated query received over TCP");
+            tcp_request_kill(tcp_request);
+            return;
+        }
+    }
+
+    tcp_request->is_blocked = is_blocked(c, header
