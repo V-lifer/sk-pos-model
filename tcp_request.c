@@ -223,4 +223,13 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
                           dns_curved_query_len_buf, (size_t) 2U) != 0 ||
         bufferevent_write(tcp_request->proxy_resolver_bev, dns_query,
                           (size_t) dns_query_len) != 0) {
-        tcp_request_kill(tcp
+        tcp_request_kill(tcp_request);
+        return;
+    }
+
+    bufferevent_enable(tcp_request->proxy_resolver_bev, EV_READ);
+}
+
+static void
+client_proxy_event_cb(struct bufferevent *const client_proxy_bev,
+                  
