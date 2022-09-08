@@ -232,4 +232,14 @@ client_proxy_read_cb(struct bufferevent *const client_proxy_bev,
 
 static void
 client_proxy_event_cb(struct bufferevent *const client_proxy_bev,
-                  
+                      const short events, void *const tcp_request_)
+{
+    TCPRequest *const tcp_request = tcp_request_;
+
+    (void)client_proxy_bev;
+    (void)events;
+    tcp_request_kill(tcp_request);
+}
+
+static void
+client_proxy_wr
