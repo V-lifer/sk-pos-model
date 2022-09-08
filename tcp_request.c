@@ -242,4 +242,13 @@ client_proxy_event_cb(struct bufferevent *const client_proxy_bev,
 }
 
 static void
-client_proxy_wr
+client_proxy_write_cb(struct bufferevent *const client_proxy_bev,
+                      void *const tcp_request_)
+{
+    TCPRequest *const tcp_request = tcp_request_;
+
+    (void)client_proxy_bev;
+    tcp_request_kill(tcp_request);
+}
+
+static v
