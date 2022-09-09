@@ -273,4 +273,9 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
                        void *const tcp_request_)
 {
     uint8_t dns_reply_len_buf[2];
-    uint8_t dns_curv
+    uint8_t dns_curved_reply_len_buf[2];
+    uint8_t *dns_reply_bev;
+    TCPRequest *tcp_request = tcp_request_;
+    struct context *c = tcp_request->context;
+    struct evbuffer *input = bufferevent_get_input(proxy_resolver_bev);
+    size_t 
