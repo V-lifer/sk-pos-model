@@ -264,4 +264,13 @@ proxy_resolver_event_cb(struct bufferevent *const proxy_resolver_bev,
     }
     if ((events & BEV_EVENT_CONNECTED) == 0) {
         tcp_tune(bufferevent_getfd(proxy_resolver_bev));
-  
+        return;
+    }
+}
+
+static void
+resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
+                       void *const tcp_request_)
+{
+    uint8_t dns_reply_len_buf[2];
+    uint8_t dns_curv
