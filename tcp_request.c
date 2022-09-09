@@ -257,4 +257,11 @@ proxy_resolver_event_cb(struct bufferevent *const proxy_resolver_bev,
 {
     TCPRequest *const tcp_request = tcp_request_;
 
-    (void)p
+    (void)proxy_resolver_bev;
+    if ((events & BEV_EVENT_ERROR) != 0) {
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    if ((events & BEV_EVENT_CONNECTED) == 0) {
+        tcp_tune(bufferevent_getfd(proxy_resolver_bev));
+  
