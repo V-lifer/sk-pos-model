@@ -283,4 +283,10 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
     static uint8_t *dns_reply = NULL;
     size_t dns_reply_len;
 
-    if (dns_reply == NULL && (dns_reply = sodium_mallo
+    if (dns_reply == NULL && (dns_reply = sodium_malloc(sizeof_dns_reply)) == NULL) {
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    logger(LOG_DEBUG, "Resolver read callback.");
+    if (tcp_request->status.has_dns_reply_len == 0) {
+       
