@@ -292,4 +292,9 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
         debug_assert(evbuffer_get_length(input) >= (size_t) 2U);
         evbuffer_remove(input, dns_reply_len_buf, sizeof dns_reply_len_buf);
         tcp_request->dns_reply_len = (size_t)
-            ((dns_reply_len_buf[0] << 8) | dns
+            ((dns_reply_len_buf[0] << 8) | dns_reply_len_buf[1]);
+        tcp_request->status.has_dns_reply_len = 1;
+    }
+    debug_assert(tcp_request->status.has_dns_reply_len != 0);
+    dns_reply_len = tcp_request->dns_reply_len;
+    if (dns
