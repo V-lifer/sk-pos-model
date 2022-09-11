@@ -278,4 +278,9 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
     TCPRequest *tcp_request = tcp_request_;
     struct context *c = tcp_request->context;
     struct evbuffer *input = bufferevent_get_input(proxy_resolver_bev);
-    size_t 
+    size_t available_size;
+    const size_t sizeof_dns_reply = DNS_MAX_PACKET_SIZE_TCP - 2U;
+    static uint8_t *dns_reply = NULL;
+    size_t dns_reply_len;
+
+    if (dns_reply == NULL && (dns_reply = sodium_mallo
