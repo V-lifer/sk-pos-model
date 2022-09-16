@@ -303,4 +303,9 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
         return;
     }
     available_size = evbuffer_get_length(input);
-    if (
+    if (available_size < dns_reply_len) {
+        bufferevent_setwatermark(tcp_request->proxy_resolver_bev,
+                                 EV_READ, dns_reply_len, dns_reply_len);
+        return;
+    }
+    debug_
