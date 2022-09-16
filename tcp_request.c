@@ -297,4 +297,10 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
     }
     debug_assert(tcp_request->status.has_dns_reply_len != 0);
     dns_reply_len = tcp_request->dns_reply_len;
-    if (dns
+    if (dns_reply_len < (size_t) DNS_HEADER_SIZE) {
+        logger(LOG_WARNING, "Short reply received");
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    available_size = evbuffer_get_length(input);
+    if (
