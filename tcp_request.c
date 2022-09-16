@@ -308,4 +308,8 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
                                  EV_READ, dns_reply_len, dns_reply_len);
         return;
     }
-    debug_
+    debug_assert(available_size >= dns_reply_len);
+    dns_reply_bev = evbuffer_pullup(input, (ssize_t) dns_reply_len);
+    if (dns_reply_bev == NULL) {
+        tcp_request_kill(tcp_request);
+        return;
