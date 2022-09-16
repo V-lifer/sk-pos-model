@@ -313,3 +313,11 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
     if (dns_reply_bev == NULL) {
         tcp_request_kill(tcp_request);
         return;
+    }
+
+    memcpy(dns_reply, dns_reply_bev, dns_reply_len);
+
+    size_t max_len =
+        dns_reply_len + DNSCRYPT_MAX_PADDING + DNSCRYPT_REPLY_HEADER_SIZE;
+
+    if (tcp_request
