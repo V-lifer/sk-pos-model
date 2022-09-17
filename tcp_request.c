@@ -326,4 +326,8 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
     }
     if (tcp_request->is_dnscrypted) {
         if (dnscrypt_server_curve(c, tcp_request->cert,
-                  
+                                  tcp_request->client_nonce, tcp_request->nmkey,
+                                  dns_reply, &dns_reply_len, max_len) != 0) {
+            logger(LOG_ERR, "Curving reply failed.");
+            return;
+    
