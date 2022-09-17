@@ -330,4 +330,10 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
                                   dns_reply, &dns_reply_len, max_len) != 0) {
             logger(LOG_ERR, "Curving reply failed.");
             return;
-    
+        }
+    }
+
+    dns_curved_reply_len_buf[0] = (dns_reply_len >> 8) & 0xff;
+    dns_curved_reply_len_buf[1] = dns_reply_len & 0xff;
+    if (bufferevent_write(tcp_request->client_proxy_bev,
+        
