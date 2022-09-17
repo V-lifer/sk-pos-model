@@ -320,4 +320,10 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
     size_t max_len =
         dns_reply_len + DNSCRYPT_MAX_PADDING + DNSCRYPT_REPLY_HEADER_SIZE;
 
-    if (tcp_request
+    if (tcp_request->is_blocked) {
+        struct dns_header *p = (struct dns_header *) dns_reply;
+        SET_RCODE(p, REFUSED);
+    }
+    if (tcp_request->is_dnscrypted) {
+        if (dnscrypt_server_curve(c, tcp_request->cert,
+                  
