@@ -351,4 +351,12 @@ static void
 tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
                   evutil_socket_t handle,
                   struct sockaddr *const client_sockaddr,
-                  const int clien
+                  const int client_sockaddr_len_int, void *const context)
+{
+    logger(LOG_DEBUG, "Accepted a tcp connection.");
+    evutil_socket_t fd;
+    struct context *c = context;
+    TCPRequest *tcp_request;
+
+    (void)tcp_conn_listener;
+    (void
