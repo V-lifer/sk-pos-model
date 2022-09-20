@@ -339,4 +339,13 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
                           dns_curved_reply_len_buf, (size_t) 2U) != 0 ||
         bufferevent_write(tcp_request->client_proxy_bev, dns_reply,
                           dns_reply_len) != 0) {
-        tcp_request_kill(tcp_requ
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    bufferevent_enable(tcp_request->client_proxy_bev, EV_WRITE);
+    bufferevent_free(tcp_request->proxy_resolver_bev);
+    tcp_request->proxy_resolver_bev = NULL;
+}
+
+static void
+tcp_c
