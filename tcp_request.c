@@ -348,4 +348,7 @@ resolver_proxy_read_cb(struct bufferevent *const proxy_resolver_bev,
 }
 
 static void
-tcp_c
+tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
+                  evutil_socket_t handle,
+                  struct sockaddr *const client_sockaddr,
+                  const int clien
