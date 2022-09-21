@@ -359,4 +359,10 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     TCPRequest *tcp_request;
 
     (void)tcp_conn_listener;
-    (void
+    (void)client_sockaddr;
+    (void)client_sockaddr_len_int;
+    if ((tcp_request = calloc((size_t) 1U, sizeof *tcp_request)) == NULL) {
+        return;
+    }
+    tcp_request->context = c;
+    tcp_request->timeout_timer =
