@@ -369,4 +369,11 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     tcp_request->proxy_resolver_query_evbuf = NULL;
     tcp_request->client_proxy_bev = bufferevent_socket_new(c->event_loop,
                                                            handle,
-            
+                                                           BEV_OPT_CLOSE_ON_FREE);
+    if (tcp_request->client_proxy_bev == NULL) {
+        evutil_closesocket(handle);
+        free(tcp_request);
+        return;
+    }
+
+    fd = socket(
