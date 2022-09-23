@@ -365,4 +365,8 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
         return;
     }
     tcp_request->context = c;
-    tcp_request->timeout_timer =
+    tcp_request->timeout_timer = NULL;
+    tcp_request->proxy_resolver_query_evbuf = NULL;
+    tcp_request->client_proxy_bev = bufferevent_socket_new(c->event_loop,
+                                                           handle,
+            
