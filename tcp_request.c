@@ -376,4 +376,8 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
         return;
     }
 
-    fd = socket(
+    fd = socket(c->resolver_sockaddr.ss_family, SOCK_STREAM, IPPROTO_TCP);
+    tcp_tune(fd);
+    if (evutil_make_socket_nonblocking(fd)) {
+        logger(LOG_WARNING, "Could not make socket %d non-blocking", fd);
+    }
