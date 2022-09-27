@@ -392,4 +392,9 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     }
 
     /* Bind source IP:port if --outgoing-address is provided */
+    if(c->outgoing_address &&
+        bind(fd,
+             (struct sockaddr *)&c->outgoing_sockaddr,
+             c->outgoing_sockaddr_len) != 0) {
+        logger(LOG_ERR, "Unable to bind (TCP) [%s]",
     
