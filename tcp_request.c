@@ -384,4 +384,12 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     tcp_request->proxy_resolver_bev = bufferevent_socket_new(c->event_loop, fd,
                                                              BEV_OPT_CLOSE_ON_FREE);
 
-    if (tcp_request->prox
+    if (tcp_request->proxy_resolver_bev == NULL) {
+        bufferevent_free(tcp_request->client_proxy_bev);
+        tcp_request->client_proxy_bev = NULL;
+        free(tcp_request);
+        return;
+    }
+
+    /* Bind source IP:port if --outgoing-address is provided */
+    
