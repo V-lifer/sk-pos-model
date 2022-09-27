@@ -381,3 +381,7 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     if (evutil_make_socket_nonblocking(fd)) {
         logger(LOG_WARNING, "Could not make socket %d non-blocking", fd);
     }
+    tcp_request->proxy_resolver_bev = bufferevent_socket_new(c->event_loop, fd,
+                                                             BEV_OPT_CLOSE_ON_FREE);
+
+    if (tcp_request->prox
