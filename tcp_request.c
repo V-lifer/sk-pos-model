@@ -408,4 +408,9 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     memset(&tcp_request->status, 0, sizeof tcp_request->status);
     tcp_request->status.is_in_queue = 1;
     if ((tcp_request->timeout_timer =
-       
+         evtimer_new(tcp_request->context->event_loop,
+                     timeout_timer_cb, tcp_request)) == NULL) {
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    const struct timeval tv = {
