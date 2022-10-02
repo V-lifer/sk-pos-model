@@ -397,4 +397,11 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
              (struct sockaddr *)&c->outgoing_sockaddr,
              c->outgoing_sockaddr_len) != 0) {
         logger(LOG_ERR, "Unable to bind (TCP) [%s]",
-    
+            evutil_socket_error_to_string(evutil_socket_geterror
+                (tcp_request->proxy_resolver_bev)));
+        tcp_request_kill(tcp_request);
+        return;
+    }
+
+    c->connections++;
+    TAILQ_INSERT_TAIL
