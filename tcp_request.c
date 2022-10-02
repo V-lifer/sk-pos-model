@@ -404,4 +404,8 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     }
 
     c->connections++;
-    TAILQ_INSERT_TAIL
+    TAILQ_INSERT_TAIL(&c->tcp_request_queue, tcp_request, queue);
+    memset(&tcp_request->status, 0, sizeof tcp_request->status);
+    tcp_request->status.is_in_queue = 1;
+    if ((tcp_request->timeout_timer =
+       
