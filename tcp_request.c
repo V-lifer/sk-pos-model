@@ -414,3 +414,8 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
         return;
     }
     const struct timeval tv = {
+        .tv_sec = (time_t) DNS_QUERY_TIMEOUT,.tv_usec = 0
+    };
+    evtimer_add(tcp_request->timeout_timer, &tv);
+    bufferevent_setwatermark(tcp_request->client_proxy_bev,
+                             EV_READ, (size_t) 2U,
