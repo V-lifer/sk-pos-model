@@ -422,4 +422,8 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
                              (size_t) DNS_MAX_PACKET_SIZE_TCP);
     bufferevent_setcb(tcp_request->client_proxy_bev,
                       client_proxy_read_cb, client_proxy_write_cb,
-                      client_proxy_ev
+                      client_proxy_event_cb, tcp_request);
+    if (bufferevent_socket_connect
+        (tcp_request->proxy_resolver_bev,
+         (struct sockaddr *)&c->resolver_sockaddr,
+         (int)c->resolver_sockaddr_len) != 0)
