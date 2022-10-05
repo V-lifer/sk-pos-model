@@ -419,3 +419,7 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     evtimer_add(tcp_request->timeout_timer, &tv);
     bufferevent_setwatermark(tcp_request->client_proxy_bev,
                              EV_READ, (size_t) 2U,
+                             (size_t) DNS_MAX_PACKET_SIZE_TCP);
+    bufferevent_setcb(tcp_request->client_proxy_bev,
+                      client_proxy_read_cb, client_proxy_write_cb,
+                      client_proxy_ev
