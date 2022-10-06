@@ -435,4 +435,12 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
                              (size_t) DNS_MAX_PACKET_SIZE_TCP);
     bufferevent_setcb(tcp_request->proxy_resolver_bev,
                       resolver_proxy_read_cb, NULL, proxy_resolver_event_cb,
-                      tcp_reque
+                      tcp_request);
+    bufferevent_enable(tcp_request->client_proxy_bev, EV_READ);
+}
+
+static void
+tcp_accept_timer_cb(evutil_socket_t handle, const short event,
+                    void *const context)
+{
+    struct context *
