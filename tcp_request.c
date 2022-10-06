@@ -426,4 +426,10 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     if (bufferevent_socket_connect
         (tcp_request->proxy_resolver_bev,
          (struct sockaddr *)&c->resolver_sockaddr,
-         (int)c->resolver_sockaddr_len) != 0)
+         (int)c->resolver_sockaddr_len) != 0) {
+        tcp_request_kill(tcp_request);
+        return;
+    }
+    bufferevent_setwatermark(tcp_request->proxy_resolver_bev,
+                             EV_READ, (size_t) 2U,
+                    
