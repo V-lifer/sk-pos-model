@@ -432,4 +432,7 @@ tcp_connection_cb(struct evconnlistener *const tcp_conn_listener,
     }
     bufferevent_setwatermark(tcp_request->proxy_resolver_bev,
                              EV_READ, (size_t) 2U,
-                    
+                             (size_t) DNS_MAX_PACKET_SIZE_TCP);
+    bufferevent_setcb(tcp_request->proxy_resolver_bev,
+                      resolver_proxy_read_cb, NULL, proxy_resolver_event_cb,
+                      tcp_reque
