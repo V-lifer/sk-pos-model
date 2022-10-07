@@ -443,4 +443,14 @@ static void
 tcp_accept_timer_cb(evutil_socket_t handle, const short event,
                     void *const context)
 {
-    struct context *
+    struct context *c = context;
+
+    (void)handle;
+    (void)event;
+    event_free(c->tcp_accept_timer);
+    c->tcp_accept_timer = NULL;
+    evconnlistener_enable(c->tcp_conn_listener);
+}
+
+static void
+tcp_accept_error_cb(str
