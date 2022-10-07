@@ -460,4 +460,10 @@ tcp_accept_error_cb(struct evconnlistener *const tcp_conn_listener,
 
     (void)tcp_conn_listener;
     if (c->tcp_accept_timer == NULL) {
-        c-
+        c->tcp_accept_timer = evtimer_new
+            (c->event_loop, tcp_accept_timer_cb, c);
+        if (c->tcp_accept_timer == NULL) {
+            return;
+        }
+    }
+    if (evtimer_pending(c->tcp_accept_timer,
