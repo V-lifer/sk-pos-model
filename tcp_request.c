@@ -490,4 +490,10 @@ tcp_listener_bind(struct context *c)
      * evconnlistener_new_bind() into a series of:
      * socket(), tcp_tune(), bind(), evconnlistener_new() */
     evutil_socket_t fd;
-    fd = socket(c->local_sockaddr.
+    fd = socket(c->local_sockaddr.ss_family, SOCK_STREAM, IPPROTO_TCP);
+
+    tcp_tune(fd);
+    evutil_make_socket_nonblocking(fd);
+
+    if (bind(fd, (struct sockaddr *) &c->local_sockaddr, c->local_sockaddr_len) < 0) {
+        log
