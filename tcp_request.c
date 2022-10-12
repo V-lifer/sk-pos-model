@@ -486,4 +486,8 @@ tcp_listener_bind(struct context *c)
 # define LEV_OPT_DEFERRED_ACCEPT 0
 #endif
 
-    /* Until libev
+    /* Until libevent gets support for SO_REUSEPORT we have to break
+     * evconnlistener_new_bind() into a series of:
+     * socket(), tcp_tune(), bind(), evconnlistener_new() */
+    evutil_socket_t fd;
+    fd = socket(c->local_sockaddr.
