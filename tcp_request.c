@@ -466,4 +466,13 @@ tcp_accept_error_cb(struct evconnlistener *const tcp_conn_listener,
             return;
         }
     }
-    if (evtimer_pending(c->tcp_accept_timer,
+    if (evtimer_pending(c->tcp_accept_timer, NULL)) {
+        return;
+    }
+    evconnlistener_disable(c->tcp_conn_listener);
+
+    const struct timeval tv = {
+        .tv_sec = (time_t) 1,
+        .tv_usec = 0
+    };
+    evtimer_add(c->tcp_accept_timer, &
