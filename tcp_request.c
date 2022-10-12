@@ -475,4 +475,15 @@ tcp_accept_error_cb(struct evconnlistener *const tcp_conn_listener,
         .tv_sec = (time_t) 1,
         .tv_usec = 0
     };
-    evtimer_add(c->tcp_accept_timer, &
+    evtimer_add(c->tcp_accept_timer, &tv);
+}
+
+int
+tcp_listener_bind(struct context *c)
+{
+    debug_assert(c->tcp_conn_listener == NULL);
+#ifndef LEV_OPT_DEFERRED_ACCEPT
+# define LEV_OPT_DEFERRED_ACCEPT 0
+#endif
+
+    /* Until libev
