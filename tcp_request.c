@@ -503,4 +503,7 @@ tcp_listener_bind(struct context *c)
     c->tcp_conn_listener =
         evconnlistener_new(c->event_loop,
                                 tcp_connection_cb, c,
-         
+                                LEV_OPT_CLOSE_ON_FREE |
+                                LEV_OPT_CLOSE_ON_EXEC |
+                                LEV_OPT_REUSEABLE |
+                                LEV_OPT_DEFERRED_ACCEPT
