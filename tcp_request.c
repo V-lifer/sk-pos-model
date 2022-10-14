@@ -506,4 +506,9 @@ tcp_listener_bind(struct context *c)
                                 LEV_OPT_CLOSE_ON_FREE |
                                 LEV_OPT_CLOSE_ON_EXEC |
                                 LEV_OPT_REUSEABLE |
-                                LEV_OPT_DEFERRED_ACCEPT
+                                LEV_OPT_DEFERRED_ACCEPT,
+                                TCP_REQUEST_BACKLOG,
+                                fd);
+    if (c->tcp_conn_listener == NULL) {
+        logger(LOG_ERR, "Unable to create listener (TCP)");
+    
