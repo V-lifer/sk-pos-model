@@ -511,4 +511,11 @@ tcp_listener_bind(struct context *c)
                                 fd);
     if (c->tcp_conn_listener == NULL) {
         logger(LOG_ERR, "Unable to create listener (TCP)");
-    
+        return -1;
+    }
+    if (evconnlistener_disable(c->tcp_conn_listener) != 0) {
+        evconnlistener_free(c->tcp_conn_listener);
+        c->tcp_conn_listener = NULL;
+        return -1;
+    }
+    evconnlistener_set_e
