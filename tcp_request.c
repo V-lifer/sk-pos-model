@@ -518,4 +518,14 @@ tcp_listener_bind(struct context *c)
         c->tcp_conn_listener = NULL;
         return -1;
     }
-    evconnlistener_set_e
+    evconnlistener_set_error_cb(c->tcp_conn_listener, tcp_accept_error_cb);
+    TAILQ_INIT(&c->tcp_request_queue);
+
+    return 0;
+}
+
+int
+tcp_listener_start(struct context *c)
+{
+    debug_assert(c->tcp_conn_listener != NULL);
+    if (evco
