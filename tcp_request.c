@@ -537,4 +537,9 @@ tcp_listener_start(struct context *c)
 void
 tcp_listener_stop(struct context *c)
 {
-    evconnlistener_free(c->tcp_conn_lis
+    evconnlistener_free(c->tcp_conn_listener);
+    c->tcp_conn_listener = NULL;
+    while (tcp_listener_kill_oldest_request(c) != 0) {
+    }
+    logger(LOG_INFO, "TCP listener shut down");
+}
