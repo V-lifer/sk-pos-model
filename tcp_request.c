@@ -528,4 +528,13 @@ int
 tcp_listener_start(struct context *c)
 {
     debug_assert(c->tcp_conn_listener != NULL);
-    if (evco
+    if (evconnlistener_enable(c->tcp_conn_listener) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
+void
+tcp_listener_stop(struct context *c)
+{
+    evconnlistener_free(c->tcp_conn_lis
