@@ -13,4 +13,13 @@ struct context;
 struct cert_;
 
 typedef struct TCPRequestStatus_ {
-    bool has_dns_qu
+    bool has_dns_query_len:1;
+    bool has_dns_reply_len:1;
+    bool is_in_queue:1;
+    bool is_dying:1;
+} TCPRequestStatus;
+
+typedef struct TCPRequest_ {
+    TAILQ_ENTRY(TCPRequest_) queue;
+    struct bufferevent *client_proxy_bev;
+    s
