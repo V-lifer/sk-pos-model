@@ -27,4 +27,10 @@ typedef struct TCPRequest_ {
     struct context *context;
     struct event *timeout_timer;
     uint8_t client_nonce[crypto_box_HALF_NONCEBYTES];
-    uint
+    uint8_t nmkey[crypto_box_BEFORENMBYTES];
+    size_t dns_query_len;
+    size_t dns_reply_len;
+    TCPRequestStatus status;
+    const struct cert_ *cert;
+    bool is_dnscrypted;
+    bool is_
