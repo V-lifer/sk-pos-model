@@ -22,4 +22,9 @@ typedef struct TCPRequestStatus_ {
 typedef struct TCPRequest_ {
     TAILQ_ENTRY(TCPRequest_) queue;
     struct bufferevent *client_proxy_bev;
-    s
+    struct bufferevent *proxy_resolver_bev;
+    struct evbuffer *proxy_resolver_query_evbuf;
+    struct context *context;
+    struct event *timeout_timer;
+    uint8_t client_nonce[crypto_box_HALF_NONCEBYTES];
+    uint
