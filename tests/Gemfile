@@ -1,3 +1,4 @@
 source 'https://rubygems.org'
 gem 'cucumber', '~> 3.1.2'
-gem 'aruba',
+gem 'aruba', '~> 0.14.6'
+gem 'net-dns'
