@@ -15,4 +15,10 @@ Feature: Test certs in TXT records
     When a client asks dnscrypt-wrapper for "2.dnscrypt-cert.example.com" "TXT" record
     Then dnscrypt-wrapper returns "1.cert"
     Then dnscrypt-wrapper does not return "keys1/1.cert"
-    Then dnscrypt-wra
+    Then dnscrypt-wrapper does not return "keys2/1.cert"
+
+  Scenario: query provider-name, TXT record, multiple certificates and TCP resolver
+    """
+    Check that we can serve recent certificate over TCP.
+    """
+    # Genera
