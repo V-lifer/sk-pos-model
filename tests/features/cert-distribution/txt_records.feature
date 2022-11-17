@@ -33,4 +33,12 @@ Feature: Test certs in TXT records
     Then dnscrypt-wrapper does not return "keys1/1.cert"
     Then dnscrypt-wrapper does not return "keys2/1.cert"
 
-  Scenario: query provider-name, TXT record, 
+  Scenario: query provider-name, TXT record, multiple esversion same key
+    """
+    Check that we can serve recent certs with different ES versions
+    for the same key.
+    """
+    # Generate a fresh cert.
+    Given a provider keypair
+    And a time limited secret key
+  
