@@ -63,4 +63,9 @@ Feature: Test certs in TXT records
     Check that A records are not served unencrypted.
     """
     Given a running dnscrypt wrapper with options "--crypt-secretkey-file=keys1/1.key  --provider-cert-file=keys1/1.cert"
-    When a client asks dns
+    When a client asks dnscrypt-wrapper for "2.dnscrypt-cert.example.com" "A" record
+    Then a "Timeout::Error" is thrown
+
+  Scenario: query non provider-name, TXT record
+    """
+    Check that TXT record for something else than provider name are not 
