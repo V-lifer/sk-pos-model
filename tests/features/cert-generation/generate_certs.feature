@@ -10,3 +10,6 @@ Feature: Test that certificates can be properly generated.
 
   Scenario: Generate a xchacha20 cert
     Given a provider keypair
+    And a time limited secret key
+    When a xchacha20 cert is generated
+    Then it is a xchacha20 cert
