@@ -33,4 +33,15 @@ struct name {								\
 	struct type *rbh_root; /* root of the tree */			\
 }
 
-#de
+#define RB_INITIALIZER(root)						\
+	{ NULL }
+
+#define RB_INIT(root) do {						\
+	(root)->rbh_root = NULL;					\
+} while (0)
+
+#define RB_BLACK	0
+#define RB_RED		1
+#define RB_ENTRY(type)							\
+struct {								\
+	struct type *rbe_left;		/* l
