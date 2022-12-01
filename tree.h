@@ -24,4 +24,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef	_S
+#ifndef	_SYS_TREE_H_
+#define	_SYS_TREE_H_
+
+/* Macros that define a red-black tree */
+#define RB_HEAD(name, type)						\
+struct name {								\
+	struct type *rbh_root; /* root of the tree */			\
+}
+
+#de
