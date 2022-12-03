@@ -60,4 +60,12 @@ struct {								\
 #define RB_SET(elm, parent, field) do {					\
 	RB_PARENT(elm, field) = parent;					\
 	RB_LEFT(elm, field) = RB_RIGHT(elm, field) = NULL;		\
-	RB_C
+	RB_COLOR(elm, field) = RB_RED;					\
+} while (0)
+
+#define RB_SET_BLACKRED(black, red, field) do {				\
+	RB_COLOR(black, field) = RB_BLACK;				\
+	RB_COLOR(red, field) = RB_RED;					\
+} while (0)
+
+#ifndef
