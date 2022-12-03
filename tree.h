@@ -54,4 +54,10 @@ struct {								\
 #define RB_RIGHT(elm, field)		(elm)->field.rbe_right
 #define RB_PARENT(elm, field)		(elm)->field.rbe_parent
 #define RB_COLOR(elm, field)		(elm)->field.rbe_color
-#define RB_ROOT(head
+#define RB_ROOT(head)			(head)->rbh_root
+#define RB_EMPTY(head)			(RB_ROOT(head) == NULL)
+
+#define RB_SET(elm, parent, field) do {					\
+	RB_PARENT(elm, field) = parent;					\
+	RB_LEFT(elm, field) = RB_RIGHT(elm, field) = NULL;		\
+	RB_C
