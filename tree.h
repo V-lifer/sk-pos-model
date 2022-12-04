@@ -68,4 +68,11 @@ struct {								\
 	RB_COLOR(red, field) = RB_RED;					\
 } while (0)
 
-#ifndef
+#ifndef RB_AUGMENT
+#define RB_AUGMENT(x)	do {} while (0)
+#endif
+
+#define RB_ROTATE_LEFT(head, elm, tmp, field) do {			\
+	(tmp) = RB_RIGHT(elm, field);					\
+	if ((RB_RIGHT(elm, field) = RB_LEFT(tmp, field))) {		\
+		RB_
