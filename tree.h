@@ -75,4 +75,9 @@ struct {								\
 #define RB_ROTATE_LEFT(head, elm, tmp, field) do {			\
 	(tmp) = RB_RIGHT(elm, field);					\
 	if ((RB_RIGHT(elm, field) = RB_LEFT(tmp, field))) {		\
-		RB_
+		RB_PARENT(RB_LEFT(tmp, field), field) = (elm);		\
+	}								\
+	RB_AUGMENT(elm);						\
+	if ((RB_PARENT(tmp, field) = RB_PARENT(elm, field))) {		\
+		if ((elm) == RB_LEFT(RB_PARENT(elm, field), field))	\
+			RB_LEFT(RB_PARENT(elm, field), f
