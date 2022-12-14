@@ -104,4 +104,12 @@ struct {								\
 		else							\
 			RB_RIGHT(RB_PARENT(elm, field), field) = (tmp);	\
 	} else								\
-		(head)->rbh_root = (tmp)
+		(head)->rbh_root = (tmp);				\
+	RB_RIGHT(tmp, field) = (elm);					\
+	RB_PARENT(elm, field) = (tmp);					\
+	RB_AUGMENT(tmp);						\
+	if ((RB_PARENT(tmp, field)))					\
+		RB_AUGMENT(RB_PARENT(tmp, field));			\
+} while (0)
+
+/* Generates prototype
