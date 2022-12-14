@@ -112,4 +112,8 @@ struct {								\
 		RB_AUGMENT(RB_PARENT(tmp, field));			\
 } while (0)
 
-/* Generates prototype
+/* Generates prototypes and inline functions */
+#define	RB_PROTOTYPE(name, type, field, cmp)				\
+	RB_PROTOTYPE_INTERNAL(name, type, field, cmp,)
+#define	RB_PROTOTYPE_STATIC(name, type, field, cmp)			\
+	RB_PROTOTYPE_INTERNAL
