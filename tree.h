@@ -99,4 +99,9 @@ struct {								\
 	}								\
 	RB_AUGMENT(elm);						\
 	if ((RB_PARENT(tmp, field) = RB_PARENT(elm, field))) {		\
-		if ((elm) == RB_LEF
+		if ((elm) == RB_LEFT(RB_PARENT(elm, field), field))	\
+			RB_LEFT(RB_PARENT(elm, field), field) = (tmp);	\
+		else							\
+			RB_RIGHT(RB_PARENT(elm, field), field) = (tmp);	\
+	} else								\
+		(head)->rbh_root = (tmp)
