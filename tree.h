@@ -94,4 +94,9 @@ struct {								\
 
 #define RB_ROTATE_RIGHT(head, elm, tmp, field) do {			\
 	(tmp) = RB_LEFT(elm, field);					\
-	if ((RB
+	if ((RB_LEFT(elm, field) = RB_RIGHT(tmp, field))) {		\
+		RB_PARENT(RB_RIGHT(tmp, field), field) = (elm);		\
+	}								\
+	RB_AUGMENT(elm);						\
+	if ((RB_PARENT(tmp, field) = RB_PARENT(elm, field))) {		\
+		if ((elm) == RB_LEF
