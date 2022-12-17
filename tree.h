@@ -126,4 +126,11 @@ attr struct type *name##_RB_FIND(struct name *, struct type *);		\
 attr struct type *name##_RB_NFIND(struct name *, struct type *);	\
 attr struct type *name##_RB_NEXT(struct type *);			\
 attr struct type *name##_RB_PREV(struct type *);			\
-attr 
+attr struct type *name##_RB_MINMAX(struct name *, int);			\
+									\
+
+/* Main rb operation.
+ * Moves node close to the key of elm to top
+ */
+#define	RB_GENERATE(name, type, field, cmp)				\
+	RB_GENERATE_INTER
