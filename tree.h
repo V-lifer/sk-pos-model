@@ -119,4 +119,7 @@ struct {								\
 	RB_PROTOTYPE_INTERNAL(name, type, field, cmp, __attribute__((__unused__)) static)
 #define RB_PROTOTYPE_INTERNAL(name, type, field, cmp, attr)		\
 attr void name##_RB_INSERT_COLOR(struct name *, struct type *);		\
-attr void name##_RB_REMOVE_COLOR(
+attr void name##_RB_REMOVE_COLOR(struct name *, struct type *, struct type *);\
+attr struct type *name##_RB_REMOVE(struct name *, struct type *);	\
+attr struct type *name##_RB_INSERT(struct name *, struct type *);	\
+attr struct type *name
