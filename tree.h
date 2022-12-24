@@ -136,4 +136,9 @@ attr struct type *name##_RB_MINMAX(struct name *, int);			\
 	RB_GENERATE_INTERNAL(name, type, field, cmp,)
 #define	RB_GENERATE_STATIC(name, type, field, cmp)			\
 	RB_GENERATE_INTERNAL(name, type, field, cmp, __attribute__((__unused__)) static)
-#define RB_GENERATE_IN
+#define RB_GENERATE_INTERNAL(name, type, field, cmp, attr)		\
+attr void								\
+name##_RB_INSERT_COLOR(struct name *head, struct type *elm)		\
+{									\
+	struct type *parent, *gparent, *tmp;				\
+	while ((
