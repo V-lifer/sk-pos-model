@@ -141,4 +141,8 @@ attr void								\
 name##_RB_INSERT_COLOR(struct name *head, struct type *elm)		\
 {									\
 	struct type *parent, *gparent, *tmp;				\
-	while ((
+	while ((parent = RB_PARENT(elm, field)) &&			\
+	    RB_COLOR(parent, field) == RB_RED) {			\
+		gparent = RB_PARENT(parent, field);			\
+		if (parent == RB_LEFT(gparent, field)) {		\
+			tmp =
