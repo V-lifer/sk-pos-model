@@ -145,4 +145,9 @@ name##_RB_INSERT_COLOR(struct name *head, struct type *elm)		\
 	    RB_COLOR(parent, field) == RB_RED) {			\
 		gparent = RB_PARENT(parent, field);			\
 		if (parent == RB_LEFT(gparent, field)) {		\
-			tmp =
+			tmp = RB_RIGHT(gparent, field);			\
+			if (tmp && RB_COLOR(tmp, field) == RB_RED) {	\
+				RB_COLOR(tmp, field) = RB_BLACK;	\
+				RB_SET_BLACKRED(parent, gparent, field);\
+				elm = gparent;				\
+	
