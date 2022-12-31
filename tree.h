@@ -162,4 +162,11 @@ name##_RB_INSERT_COLOR(struct name *head, struct type *elm)		\
 			RB_ROTATE_RIGHT(head, gparent, tmp, field);	\
 		} else {						\
 			tmp = RB_LEFT(gparent, field);			\
-			if (tmp && RB_COLOR(tmp, fie
+			if (tmp && RB_COLOR(tmp, field) == RB_RED) {	\
+				RB_COLOR(tmp, field) = RB_BLACK;	\
+				RB_SET_BLACKRED(parent, gparent, field);\
+				elm = gparent;				\
+				continue;				\
+			}						\
+			if (RB_LEFT(parent, field) == elm) {		\
+		
