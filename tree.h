@@ -175,4 +175,11 @@ name##_RB_INSERT_COLOR(struct name *head, struct type *elm)		\
 				elm = tmp;				\
 			}						\
 			RB_SET_BLACKRED(parent, gparent, field);	\
-			RB_ROTATE_LEFT(head, gparent,
+			RB_ROTATE_LEFT(head, gparent, tmp, field);	\
+		}							\
+	}								\
+	RB_COLOR(head->rbh_root, field) = RB_BLACK;			\
+}									\
+									\
+attr void								\
+name##_RB_REMOVE_COLOR(struct name *head, struct type *parent
