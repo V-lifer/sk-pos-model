@@ -182,4 +182,9 @@ name##_RB_INSERT_COLOR(struct name *head, struct type *elm)		\
 }									\
 									\
 attr void								\
-name##_RB_REMOVE_COLOR(struct name *head, struct type *parent
+name##_RB_REMOVE_COLOR(struct name *head, struct type *parent, struct type *elm) \
+{									\
+	struct type *tmp;						\
+	while ((elm == NULL || RB_COLOR(elm, field) == RB_BLACK) &&	\
+	    elm != RB_ROOT(head)) {					\
+		if (RB_LEFT(parent, field) == elm)
