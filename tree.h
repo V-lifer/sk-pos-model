@@ -202,3 +202,9 @@ name##_RB_REMOVE_COLOR(struct name *head, struct type *parent, struct type *elm)
 				elm = parent;				\
 				parent = RB_PARENT(elm, field);		\
 			} else {					\
+				if (RB_RIGHT(tmp, field) == NULL ||	\
+				    RB_COLOR(RB_RIGHT(tmp, field), field) == RB_BLACK) {\
+					struct type *oleft;		\
+					if ((oleft = RB_LEFT(tmp, field)))\
+						RB_COLOR(oleft, field) = RB_BLACK;\
+					R
