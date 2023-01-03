@@ -225,4 +225,8 @@ name##_RB_REMOVE_COLOR(struct name *head, struct type *parent, struct type *elm)
 				RB_SET_BLACKRED(tmp, parent, field);	\
 				RB_ROTATE_RIGHT(head, parent, tmp, field);\
 				tmp = RB_LEFT(parent, field);		\
-	
+			}						\
+			if ((RB_LEFT(tmp, field) == NULL ||		\
+			    RB_COLOR(RB_LEFT(tmp, field), field) == RB_BLACK) &&\
+			    (RB_RIGHT(tmp, field) == NULL ||		\
+			    RB_COLOR(RB_RIGHT(tmp, field), field) == RB_BL
