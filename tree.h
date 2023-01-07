@@ -254,4 +254,12 @@ name##_RB_REMOVE_COLOR(struct name *head, struct type *parent, struct type *elm)
 		}							\
 	}								\
 	if (elm)							\
-		RB_COLOR(elm, field) = RB_
+		RB_COLOR(elm, field) = RB_BLACK;			\
+}									\
+									\
+attr struct type *							\
+name##_RB_REMOVE(struct name *head, struct type *elm)			\
+{									\
+	struct type *child, *parent, *old = elm;			\
+	int color;							\
+	if (RB_LEF
