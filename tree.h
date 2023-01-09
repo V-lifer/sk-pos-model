@@ -262,4 +262,10 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 {									\
 	struct type *child, *parent, *old = elm;			\
 	int color;							\
-	if (RB_LEF
+	if (RB_LEFT(elm, field) == NULL)				\
+		child = RB_RIGHT(elm, field);				\
+	else if (RB_RIGHT(elm, field) == NULL)				\
+		child = RB_LEFT(elm, field);				\
+	else {								\
+		struct type *left;					\
+		elm
