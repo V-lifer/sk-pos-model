@@ -268,4 +268,9 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 		child = RB_LEFT(elm, field);				\
 	else {								\
 		struct type *left;					\
-		elm
+		elm = RB_RIGHT(elm, field);				\
+		while ((left = RB_LEFT(elm, field)))			\
+			elm = left;					\
+		child = RB_RIGHT(elm, field);				\
+		parent = RB_PARENT(elm, field);				\
+		color = RB_COLOR(elm, field);
