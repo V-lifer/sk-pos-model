@@ -293,4 +293,11 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 			else						\
 				RB_RIGHT(RB_PARENT(old, field), field) = elm;\
 			RB_AUGMENT(RB_PARENT(old, field));		\
-		} 
+		} else							\
+			RB_ROOT(head) = elm;				\
+		RB_PARENT(RB_LEFT(old, field), field) = elm;		\
+		if (RB_RIGHT(old, field))				\
+			RB_PARENT(RB_RIGHT(old, field), field) = elm;	\
+		if (parent) {						\
+			left = parent;					\
+			do 
