@@ -300,4 +300,12 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 			RB_PARENT(RB_RIGHT(old, field), field) = elm;	\
 		if (parent) {						\
 			left = parent;					\
-			do 
+			do {						\
+				RB_AUGMENT(left);			\
+			} while ((left = RB_PARENT(left, field)));	\
+		}							\
+		goto color;						\
+	}								\
+	parent = RB_PARENT(elm, field);					\
+	color = RB_COLOR(elm, field);					\
+	if (child)	
