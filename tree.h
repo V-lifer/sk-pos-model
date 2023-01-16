@@ -308,4 +308,10 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 	}								\
 	parent = RB_PARENT(elm, field);					\
 	color = RB_COLOR(elm, field);					\
-	if (child)	
+	if (child)							\
+		RB_PARENT(child, field) = parent;			\
+	if (parent) {							\
+		if (RB_LEFT(parent, field) == elm)			\
+			RB_LEFT(parent, field) = child;			\
+		else							\
+			RB_
