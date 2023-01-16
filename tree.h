@@ -314,4 +314,10 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 		if (RB_LEFT(parent, field) == elm)			\
 			RB_LEFT(parent, field) = child;			\
 		else							\
-			RB_
+			RB_RIGHT(parent, field) = child;		\
+		RB_AUGMENT(parent);					\
+	} else								\
+		RB_ROOT(head) = child;					\
+color:									\
+	if (color == RB_BLACK)						\
+		name##_RB_REMOVE_COL
