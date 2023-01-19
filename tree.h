@@ -320,4 +320,12 @@ name##_RB_REMOVE(struct name *head, struct type *elm)			\
 		RB_ROOT(head) = child;					\
 color:									\
 	if (color == RB_BLACK)						\
-		name##_RB_REMOVE_COL
+		name##_RB_REMOVE_COLOR(head, parent, child);		\
+	return (old);							\
+}									\
+									\
+/* Inserts a node into the RB tree */					\
+attr struct type *							\
+name##_RB_INSERT(struct name *head, struct type *elm)			\
+{									\
+	struct ty
