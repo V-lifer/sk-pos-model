@@ -328,4 +328,12 @@ color:									\
 attr struct type *							\
 name##_RB_INSERT(struct name *head, struct type *elm)			\
 {									\
-	struct ty
+	struct type *tmp;						\
+	struct type *parent = NULL;					\
+	int comp = 0;							\
+	tmp = RB_ROOT(head);						\
+	while (tmp) {							\
+		parent = tmp;						\
+		comp = (cmp)(elm, parent);				\
+		if (comp < 0)						\
+			tmp = RB
