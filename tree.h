@@ -336,4 +336,13 @@ name##_RB_INSERT(struct name *head, struct type *elm)			\
 		parent = tmp;						\
 		comp = (cmp)(elm, parent);				\
 		if (comp < 0)						\
-			tmp = RB
+			tmp = RB_LEFT(tmp, field);			\
+		else if (comp > 0)					\
+			tmp = RB_RIGHT(tmp, field);			\
+		else							\
+			return (tmp);					\
+	}								\
+	RB_SET(elm, parent, field);					\
+	if (parent != NULL) {						\
+		if (comp < 0)						\
+			RB_LEFT(
