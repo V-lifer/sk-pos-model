@@ -345,4 +345,11 @@ name##_RB_INSERT(struct name *head, struct type *elm)			\
 	RB_SET(elm, parent, field);					\
 	if (parent != NULL) {						\
 		if (comp < 0)						\
-			RB_LEFT(
+			RB_LEFT(parent, field) = elm;			\
+		else							\
+			RB_RIGHT(parent, field) = elm;			\
+		RB_AUGMENT(parent);					\
+	} else								\
+		RB_ROOT(head) = elm;					\
+	name##_RB_INSERT_COLOR(head, elm);				\
+	return (NULL);	
