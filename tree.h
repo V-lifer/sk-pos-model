@@ -352,4 +352,10 @@ name##_RB_INSERT(struct name *head, struct type *elm)			\
 	} else								\
 		RB_ROOT(head) = elm;					\
 	name##_RB_INSERT_COLOR(head, elm);				\
-	return (NULL);	
+	return (NULL);							\
+}									\
+									\
+/* Finds the node with the same key as elm */				\
+attr struct type *							\
+name##_RB_FIND(struct name *head, struct type *elm)			\
+{		
