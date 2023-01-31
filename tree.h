@@ -358,4 +358,12 @@ name##_RB_INSERT(struct name *head, struct type *elm)			\
 /* Finds the node with the same key as elm */				\
 attr struct type *							\
 name##_RB_FIND(struct name *head, struct type *elm)			\
-{		
+{									\
+	struct type *tmp = RB_ROOT(head);				\
+	int comp;							\
+	while (tmp) {							\
+		comp = cmp(elm, tmp);					\
+		if (comp < 0)						\
+			tmp = RB_LEFT(tmp, field);			\
+		else if (comp > 0)					\
+			tm
