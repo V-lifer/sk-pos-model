@@ -366,4 +366,12 @@ name##_RB_FIND(struct name *head, struct type *elm)			\
 		if (comp < 0)						\
 			tmp = RB_LEFT(tmp, field);			\
 		else if (comp > 0)					\
-			tm
+			tmp = RB_RIGHT(tmp, field);			\
+		else							\
+			return (tmp);					\
+	}								\
+	return (NULL);							\
+}									\
+									\
+/* Finds the first node greater than or equal to the search key */	\
+attr struct type 
