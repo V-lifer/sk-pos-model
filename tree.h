@@ -374,4 +374,11 @@ name##_RB_FIND(struct name *head, struct type *elm)			\
 }									\
 									\
 /* Finds the first node greater than or equal to the search key */	\
-attr struct type 
+attr struct type *							\
+name##_RB_NFIND(struct name *head, struct type *elm)			\
+{									\
+	struct type *tmp = RB_ROOT(head);				\
+	struct type *res = NULL;					\
+	int comp;							\
+	while (tmp) {							\
+		comp
