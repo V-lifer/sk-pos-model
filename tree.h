@@ -381,4 +381,12 @@ name##_RB_NFIND(struct name *head, struct type *elm)			\
 	struct type *res = NULL;					\
 	int comp;							\
 	while (tmp) {							\
-		comp
+		comp = cmp(elm, tmp);					\
+		if (comp < 0) {						\
+			res = tmp;					\
+			tmp = RB_LEFT(tmp, field);			\
+		}							\
+		else if (comp > 0)					\
+			tmp = RB_RIGHT(tmp, field);			\
+		else							\
+			return (
