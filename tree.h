@@ -389,4 +389,13 @@ name##_RB_NFIND(struct name *head, struct type *elm)			\
 		else if (comp > 0)					\
 			tmp = RB_RIGHT(tmp, field);			\
 		else							\
-			return (
+			return (tmp);					\
+	}								\
+	return (res);							\
+}									\
+									\
+/* ARGSUSED */								\
+attr struct type *							\
+name##_RB_NEXT(struct type *elm)					\
+{									\
+	if (RB_RI
