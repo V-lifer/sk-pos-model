@@ -398,4 +398,10 @@ name##_RB_NFIND(struct name *head, struct type *elm)			\
 attr struct type *							\
 name##_RB_NEXT(struct type *elm)					\
 {									\
-	if (RB_RI
+	if (RB_RIGHT(elm, field)) {					\
+		elm = RB_RIGHT(elm, field);				\
+		while (RB_LEFT(elm, field))				\
+			elm = RB_LEFT(elm, field);			\
+	} else {							\
+		if (RB_PARENT(elm, field) &&				\
+		    (elm 
