@@ -417,4 +417,11 @@ name##_RB_NEXT(struct type *elm)					\
 }									\
 									\
 /* ARGSUSED */								\
-attr struct type *			
+attr struct type *							\
+name##_RB_PREV(struct type *elm)					\
+{									\
+	if (RB_LEFT(elm, field)) {					\
+		elm = RB_LEFT(elm, field);				\
+		while (RB_RIGHT(elm, field))				\
+			elm = RB_RIGHT(elm, field);			\
+	
