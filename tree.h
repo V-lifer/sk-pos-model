@@ -424,4 +424,9 @@ name##_RB_PREV(struct type *elm)					\
 		elm = RB_LEFT(elm, field);				\
 		while (RB_RIGHT(elm, field))				\
 			elm = RB_RIGHT(elm, field);			\
-	
+	} else {							\
+		if (RB_PARENT(elm, field) &&				\
+		    (elm == RB_RIGHT(RB_PARENT(elm, field), field)))	\
+			elm = RB_PARENT(elm, field);			\
+		else {							\
+			while (RB_PARENT(elm, field) &&	
