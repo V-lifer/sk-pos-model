@@ -438,4 +438,11 @@ name##_RB_PREV(struct type *elm)					\
 	return (elm);							\
 }									\
 									\
-attr
+attr struct type *							\
+name##_RB_MINMAX(struct name *head, int val)				\
+{									\
+	struct type *tmp = RB_ROOT(head);				\
+	struct type *parent = NULL;					\
+	while (tmp) {							\
+		parent = tmp;						\
+	
