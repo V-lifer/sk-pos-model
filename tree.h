@@ -445,4 +445,15 @@ name##_RB_MINMAX(struct name *head, int val)				\
 	struct type *parent = NULL;					\
 	while (tmp) {							\
 		parent = tmp;						\
-	
+		if (val < 0)						\
+			tmp = RB_LEFT(tmp, field);			\
+		else							\
+			tmp = RB_RIGHT(tmp, field);			\
+	}								\
+	return (parent);						\
+}
+
+#define RB_NEGINF	-1
+#define RB_INF	1
+
+#define RB_INSERT(na
