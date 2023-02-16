@@ -472,3 +472,10 @@ name##_RB_MINMAX(struct name *head, int val)				\
 
 #define RB_FOREACH_SAFE(x, name, head, y)				\
 	for ((x) = RB_MIN(name, head);					\
+	    ((x) != NULL) && ((y) = name##_RB_NEXT(x), 1);		\
+	     (x) = (y))
+
+#define RB_FOREACH_REVERSE(x, name, head)				\
+	for ((x) = RB_MAX(name, head);					\
+	     (x) != NULL;						\
+	     (x
