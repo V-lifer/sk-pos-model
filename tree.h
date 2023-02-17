@@ -478,4 +478,11 @@ name##_RB_MINMAX(struct name *head, int val)				\
 #define RB_FOREACH_REVERSE(x, name, head)				\
 	for ((x) = RB_MAX(name, head);					\
 	     (x) != NULL;						\
-	     (x
+	     (x) = name##_RB_PREV(x))
+
+#define RB_FOREACH_REVERSE_SAFE(x, name, head, y)			\
+	for ((x) = RB_MAX(name, head);					\
+	    ((x) != NULL) && ((y) = name##_RB_PREV(x), 1);		\
+	     (x) = (y))
+
+#endif	/* _S
