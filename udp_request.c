@@ -193,3 +193,233 @@ sendto_with_retry(SendtoWithRetryCtx *const ctx)
         ctx_cb = event_get_callback_arg(udp_request->sendto_retry_timer);
         assert(ctx_cb != NULL);
         assert(ctx_cb->udp_request == ctx->udp_request);
+        assert(ctx_cb->buffer == ctx->buffer);
+    } else {
+        if ((ctx_cb = malloc(sizeof *ctx_cb)) == NULL) {
+            udp_request_kill(udp_request);
+            return -1;
+        }
+        assert(ctx_cb ==
+               event_get_callback_arg(udp_request->sendto_retry_timer));
+        *ctx_cb = *ctx;
+        if ((udp_request->sendto_retry_timer =
+             evtimer_new(udp_request->context->event_loop,
+                         sendto_with_retry_timer_cb, ctx_cb)) == NULL) {
+            free(ctx_cb);
+            udp_request_kill(udp_request);
+            return -1;
+        }
+    }
+    const struct timeval tv = {
+        .tv_sec = (time_t) UDP_DELAY_BETWEEN_RETRIES,.tv_usec = 0
+    };
+    evtimer_add(udp_request->sendto_retry_timer, &tv);
+    return -1;
+
+}
+
+static void
+timeout_timer_cb(evutil_socket_t timeout_timer_handle, short ev_flags,
+                 void *const udp_request_)
+{
+    UDPRequest *const udp_request = udp_request_;
+
+    (void)ev_flags;
+    (void)timeout_timer_handle;
+    logger(LOG_DEBUG, "resolver timeout (UDP)");
+    udp_request_kill(udp_request);
+}
+
+/**
+ * Return 0 if served.
+ */
+static int
+self_serve_cert_file(struct context *c, struct dns_header *header,
+                     size_t dns_query_len, size_t max_len, UDPRequest *udp_request)
+{
+    int ret = dnscrypt_self_serve_cert_file(c, header, &dns_query_len, max_len);
+    if (ret == 0) {
+        SendtoWithRetryCtx retry_ctx = {
+            .udp_request = udp_request,
+            .handle = udp_request->client_proxy_handle,
+            .buffer = header,
+            .length = dns_query_len,
+            .flags = 0,
+            .dest_addr = (struct sockaddr *)&udp_request->client_sockaddr,
+            .dest_len = udp_request->client_sockaddr_len,
+            .cb = udp_request_kill
+        };
+        sendto_with_retry(&retry_ctx);
+        return 0;
+    }
+    logger(LOG_DEBUG, "failed to serve cert file, err: %d", ret);
+    return ret;
+}
+
+static void
+client_to_proxy_cb(evutil_socket_t client_proxy_handle, short ev_flags,
+                   void *const context)
+{
+    logger(LOG_DEBUG, "client to proxy cb");
+    const size_t sizeof_dns_query = DNS_MAX_PACKET_SIZE_UDP;
+    static uint8_t *dns_query = NULL;
+    struct context *c = context;
+    UDPRequest *udp_request;
+    ssize_t nread;
+    size_t dns_query_len = 0;
+
+    if (dns_query == NULL && (dns_query = sodium_malloc(sizeof_dns_query)) == NULL) {
+        return;
+    }
+    (void)ev_flags;
+    assert(client_proxy_handle == c->udp_listener_handle);
+
+    udp_request = calloc(1, sizeof(*udp_request));
+    if (udp_request == NULL)
+        return;
+
+    udp_request->context = c;
+    udp_request->sendto_retry_timer = NULL;
+    udp_request->timeout_timer = NULL;
+    udp_request->client_proxy_handle = client_proxy_handle;
+    udp_request->client_sockaddr_len = sizeof(udp_request->client_sockaddr);
+    memset(&udp_request->status, 0, sizeof(udp_request->status));
+    nread = recvfrom(client_proxy_handle,
+                     (void *)dns_query,
+                     sizeof_dns_query,
+                     0,
+                     (struct sockaddr *)&udp_request->client_sockaddr,
+                     &udp_request->client_sockaddr_len);
+    if (nread < 0) {
+        const int err = evutil_socket_geterror(client_proxy_handle);
+        if (!EVUTIL_ERR_RW_RETRIABLE(err)) {
+            logger(LOG_WARNING, "recvfrom(client): [%s]",
+                   evutil_socket_error_to_string(err));
+        }
+        udp_request_kill(udp_request);
+        return;
+    }
+
+    if (nread < (ssize_t) DNS_HEADER_SIZE || nread > sizeof_dns_query) {
+        logger(LOG_DEBUG, "Short query received");
+        udp_request_kill(udp_request);
+        return;
+    }
+
+    dns_query_len = (size_t) nread;
+    assert(dns_query_len <= sizeof_dns_query);
+
+    assert(SIZE_MAX - DNSCRYPT_MAX_PADDING - DNSCRYPT_QUERY_HEADER_SIZE >
+           dns_query_len);
+
+    udp_request->len = (uint16_t) dns_query_len;
+    // decrypt if encrypted
+    struct dnscrypt_query_header *dnscrypt_header =
+        (struct dnscrypt_query_header *)dns_query;
+    debug_assert(sizeof c->keypairs[0].crypt_publickey >= DNSCRYPT_MAGIC_HEADER_LEN);
+    if ((udp_request->cert =
+         find_cert(c, dnscrypt_header->magic_query, dns_query_len)) == NULL) {
+        udp_request->is_dnscrypted = false;
+    } else {
+        if (dnscrypt_server_uncurve(c, udp_request->cert,
+                                    udp_request->client_nonce,
+                                    udp_request->nmkey, dns_query,
+                                    &dns_query_len) != 0 || dns_query_len < DNS_HEADER_SIZE) {
+            logger(LOG_DEBUG, "Received a suspicious query from the client");
+            udp_request_kill(udp_request);
+            return;
+        }
+        udp_request->is_dnscrypted = true;
+    }
+
+    struct dns_header *header = (struct dns_header *)dns_query;
+
+    // self serve signed certificate for provider name?
+    if (!udp_request->is_dnscrypted) {
+        if (self_serve_cert_file(c, header, dns_query_len, sizeof_dns_query, udp_request) == 0)
+            return;
+        if (!c->allow_not_dnscrypted) {
+            logger(LOG_DEBUG, "Unauthenticated query received over UDP");
+            udp_request_kill(udp_request);
+            return;
+        }
+    }
+
+    udp_request->is_blocked = is_blocked(c, header, dns_query_len);
+
+    udp_request->id = ntohs(header->id);
+    if (questions_hash(&udp_request->hash, header, dns_query_len, c->namebuff, c->hash_key) != 0) {
+        logger(LOG_DEBUG, "Received a suspicious query from the client");
+        udp_request_kill(udp_request);
+        return;
+    }
+
+    static uint16_t gen;
+    udp_request->gen = gen++;
+    udp_request->status.is_in_queue = 1;
+    c->connections++;
+    RB_INSERT(UDPRequestQueue_, &c->udp_request_queue, udp_request);
+
+    udp_request->timeout_timer =
+        evtimer_new(udp_request->context->event_loop, timeout_timer_cb,
+                    udp_request);
+    if (udp_request->timeout_timer) {
+        const struct timeval tv = {
+            .tv_sec = (time_t) DNS_QUERY_TIMEOUT,.tv_usec = 0
+        };
+        evtimer_add(udp_request->timeout_timer, &tv);
+    }
+
+    SendtoWithRetryCtx retry_ctx = {
+        .udp_request = udp_request,.handle =
+            c->udp_resolver_handle,.buffer = dns_query,.length =
+            dns_query_len,.flags = 0,.dest_addr =
+            (struct sockaddr *)&c->resolver_sockaddr,.dest_len =
+            c->resolver_sockaddr_len,.cb = client_to_proxy_cb_sendto_cb
+    };
+    sendto_with_retry(&retry_ctx);
+}
+
+/*
+ * Find corresponding request by DNS id and hash of questions.
+ */
+static UDPRequest *
+lookup_request(struct context *c, uint16_t id, uint64_t hash)
+{
+    UDPRequest *found_udp_request;
+    UDPRequest scanned_udp_request;
+
+    scanned_udp_request.hash = hash;
+    scanned_udp_request.id = id;
+    scanned_udp_request.gen = (uint16_t) 0U;
+    found_udp_request = RB_NFIND(UDPRequestQueue_, &c->udp_request_queue,
+                                 &scanned_udp_request);
+    if (found_udp_request == NULL ||
+        found_udp_request->hash != hash || found_udp_request->id != id) {
+        return NULL;
+    }
+    return found_udp_request;
+}
+
+static int
+maybe_truncate(uint8_t *const dns_reply, size_t *const dns_reply_len_p, size_t query_len)
+{
+    struct dns_header *header = (struct dns_header *)dns_reply;
+    uint8_t *ansp;
+
+    if (*dns_reply_len_p <= sizeof(struct dns_header)) {
+        *dns_reply_len_p = 0;
+        return -1;
+    }
+    if (query_len >= *dns_reply_len_p) {
+        return 0;
+    }
+    if (!(ansp = skip_questions(header, *dns_reply_len_p))) {
+        *dns_reply_len_p = sizeof(struct dns_header);
+        return -1;
+    }
+    *dns_reply_len_p = (size_t) (ansp - dns_reply);
+    header->hb3 |= HB3_TC;
+    header->ancount = htons(0);
+    header->nscount = htons(0);
+    header->arcount = htons(0);
