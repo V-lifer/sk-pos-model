@@ -24,4 +24,13 @@ typedef struct UDPRequest_ {
     uint8_t nmkey[crypto_box_BEFORENMBYTES];
     struct sockaddr_storage client_sockaddr;
     evutil_socket_t client_proxy_handle;
-    ev_socklen_t client_s
+    ev_socklen_t client_sockaddr_len;
+    UDPRequestStatus status;
+    unsigned char retries;
+    const struct cert_ *cert;
+    bool is_dnscrypted;
+    bool is_blocked;
+} UDPRequest;
+
+typedef TAILQ_HEAD(TCPRequestQueue_, TCPRequest_) TCPRequestQueue;
+ty
