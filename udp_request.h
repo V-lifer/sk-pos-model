@@ -33,4 +33,9 @@ typedef struct UDPRequest_ {
 } UDPRequest;
 
 typedef TAILQ_HEAD(TCPRequestQueue_, TCPRequest_) TCPRequestQueue;
-ty
+typedef RB_HEAD(UDPRequestQueue_, UDPRequest_) UDPRequestQueue;
+
+int udp_listener_bind(struct context *c);
+int udp_listener_start(struct context *c);
+void udp_listener_stop(struct context *c);
+int udp_listene
